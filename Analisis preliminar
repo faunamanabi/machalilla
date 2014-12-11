@@ -1,0 +1,373 @@
+
+
+# Carga paquetes
+library (unmarked)
+library (lubridate)
+library (ggplot2)
+library(plyr)
+
+
+
+# read data
+data<-read.csv(file = "data/Flavio4.csv",header = T,sep = ",")
+
+# counts
+cams<-unique(data$Camara)
+cams<-sort(cams)
+# rows<-length(cams) # if cam is site. Here several cams per site
+
+# fix date and hour
+data$date_hour<- dmy_hms(paste(data$Fecha,data$Hora, sep = " ")) 
+
+###############################
+# select year 2013 & 2014 #############
+###############################
+
+# put yr and month
+data$yr<-year(data$date_hour)
+data$month<-month(data$date_hour)
+data$week<-week(data$date_hour)
+data_yr13_14<-subset (x = data, yr == "2013" | yr == "2014")
+
+
+###############################
+# Use just incluir #############
+###############################
+
+data_yr13_14_i<-subset (x = data_yr13_14, incluir == "1")
+
+data_sp1<-data_yr13_14_i
+sites<-unique(data_sp1$Sitio)
+sites<-sort(sites)
+rows<-length(sites)
+
+
+#############################################
+##    stamp start and end day    ##############
+#############################################
+
+data_sp1<-ddply(data_sp1, c("Sitio", "Camara"), mutate, # ask Daniel if camera change name or not
+             start    = min (date_hour),
+             end = max (date_hour),
+             start_day = min (yday(date_hour)),
+             end_day = max (yday(date_hour)), 
+             year = year(date_hour))
+
+#############################################
+# identifica Fecha <> 2013 and 1014  y elimina
+#############################################
+# eliminar3<-which(data_sp1$year > 2014)
+# data_sp1<-data_sp1[-eliminar3,] # chk empty eliminar
+# eliminar4<-which(data_sp1$year == 2011)
+# data_sp1<-data_sp1[-eliminar4,]
+
+
+################################################
+#### first and last sampling day   ########
+###############################################
+yr2013<-subset (x = data_sp1, yr == "2013") 
+day_start<-yday(min(yr2013$date_hour))
+week_start_13<-week(min(yr2013$date_hour))
+
+yr2014<-subset (x = data_sp1, yr == "2014") 
+day_end<-yday(max(yr2014$date_hour)) + (365 - yday(min(data_sp1$date_hour))) # because sampling finish 1 year later
+week_end_14<-week(max(yr2014$date_hour))
+
+data_sp1$floor_day<-floor_date(data_sp1$date_hour, "day") # group all hours in the same day
+data_copy<-data_sp1
+
+#################################################
+################################################
+#####   CHK not really sure ################# verificar fecha 1as fotos
+#############################################
+################################################
+# loop to put sampling days on column day
+for (i in 1:nrow(data_sp1)){
+  #print(i)
+  if (year(data_sp1$floor_day[i]) == 2014) 
+    data_sp1$day[i]<- (day(data_sp1$floor_day[i]) + 365 - day_start)
+  else
+  # if (year(data_sp1$floor_day[i]) == 2013)
+    data_sp1$day[i]<- yday(data_sp1$floor_day[i]) 
+}
+
+
+# loop to fix starting  days
+for (i in 1:nrow(data_sp1)){
+  if (year(data_sp1$start[i]) == 2014) 
+      data_sp1$start_day2[i]<- (data_sp1$start_day[i] + 365) - yday(min(data_sp1$date_hour))
+  if (year(data_sp1$start[i]) == 2013) 
+    data_sp1$start_day2[i]<- data_sp1$start_day[i] 
+}
+
+# loop to fix ending  days
+for (i in 1:nrow(data_sp1)){
+  if (year(data_sp1$start[i]) == 2014) 
+    data_sp1$end_day2[i]<- (data_sp1$end_day[i] + 365) - yday(min(data_sp1$date_hour))
+  if (year(data_sp1$start[i]) == 2013) 
+    data_sp1$end_day2[i]<- data_sp1$end_day2[i] 
+}
+
+dataset2013<-subset(data_sp1, year==2013)  
+dataset2014<-subset(data_sp1, year==2014) 
+
+sampled_days2013<-yday(sort(unique(dataset2013$floor_day))) - 3 # starts in 4-1
+sampled_days2014<-(yday(sort(unique(dataset2014$floor_day))) + 365) - 4
+
+
+rango<-seq(min(sampled_days2013),max(sampled_days2014))
+  #start and end dates of sampling periods
+  min<-min(rango)
+  max<-max(rango)
+  cols<-max-min+1
+  
+  #sampling period
+  date.header<-seq(from=min,to=max, by=1)
+  mat<-matrix(NA,rows,cols,dimnames=list(sites,as.character(date.header)))
+  covdet<-matrix(NA,rows,cols,dimnames=list(sites,as.character(date.header)))
+
+#############################################
+# Grouping per week
+#############################################
+sampled_weeks2013<-subset(data_copy, year==2013)
+sampled_weeks2014<-subset(data_copy, year==2014)
+sampled_weeks2014$week<-sampled_weeks2014$week + 53 #  year has 53 weeks
+
+sampled_weeks<-rbind(sampled_weeks2013,sampled_weeks2014)
+ # continues later...
+
+#####################################
+# sub set species per day########
+#####################################
+
+data_guanta<-subset (x = data_sp1, Binomial == "Cuniculus paca")
+
+photo_site<-list()  # empty list
+# loop to group cams per site
+for (i in 1:length(sites)){
+  data_site<-subset(data_guanta, Sitio == sites[i]) # get data for site(i)
+  index_site<-sort(unique(data_site$day)) # 
+  if (sum(index_site)==0) {next}
+  cam_put<-min(data_site$start_day2)
+  cam_take<-max(data_site$end_day2)
+  #ceros<-rep(0,cam_take-cam_put+1)
+  inde_ceros<-c(cam_put:cam_take)
+  mat[i,inde_ceros]<-0
+  mat[i,index_site]<-1
+  covdet[i,index_site]<-index_site
+}
+
+##################################
+# delete row full of NA from mat
+##################################
+row.has.all.na <- apply(mat, 1, function(x){all(is.na(x))}) # Detect NA row
+mat.filtered <- mat[!row.has.all.na,] # delete NA rows
+covdet.filtered<-covdet[!row.has.all.na,] 
+# see preview of mat. Red=0, blue=1, NA=white
+image(t(mat.filtered),col =  rainbow(3),  xlab = "Day 1-341",  ylab = "Site")
+
+
+#############################################
+##    stamp start and end week    ##############
+#############################################
+
+sampled_weeks<-ddply(sampled_weeks, c("Sitio", "Camara"), mutate, # ask Daniel if camera change name or not
+                     start_week = min (week),
+                     end_week = max (week))
+
+#sampling period
+date.header.week<-seq(from=1,to=max(sampled_weeks$week), by=1)
+cols.w<-max(sampled_weeks$week)
+
+start_week<-min (sampled_weeks$week) 
+end_week<-max (sampled_weeks$week)
+
+#####################################
+# sub set species per week ########
+#####################################
+
+data_guanta.w<-subset (x = sampled_weeks, Binomial == "Cuniculus paca")
+
+mat.week<-matrix(NA,rows,cols.w,dimnames=list(sites,as.character(date.header.week)))
+covdet.week<-matrix(NA,rows,cols.w,dimnames=list(sites,as.character(date.header.week)))
+
+
+photo_site<-list()  # empty list
+# loop to group cams per site
+for (i in 1:length(sites)){
+  data_site<-subset(data_guanta.w, Sitio == sites[i]) # get data for site(i)
+  index_site<-sort(unique(data_site$week)) # 
+  if (sum(index_site)==0) {next}
+  cam_put<-min(data_site$start_week)
+  cam_take<-max(data_site$end_week)
+  #ceros<-rep(0,cam_take-cam_put+1)
+  inde_ceros<-c(cam_put:cam_take)
+  mat.week[i,inde_ceros]<-0
+  mat.week[i,index_site]<-1
+  covdet.week[i,index_site]<-index_site
+}
+
+##########################################
+##### fix mat.week by sampling duration
+########################################
+mat.week2<-mat.week[,start_week:(end_week)]
+covdet.week2<-covdet.week[,start_week:end_week]
+
+# see preview of mat.week Red=0, blue=1, NA=white
+image(t(mat.week2),col =  rainbow(3),  xlab = "week 29-84",  ylab = "Sites")
+image(t(covdet.week2),col =  rainbow(13),  xlab = "week 28-83",  ylab = "Sites")
+
+##########################################################
+# delete row full of NA from mat.week2 if there is any
+############################################################
+row.has.all.na <- apply(mat.week2, 1, function(x){all(is.na(x))}) # Detect NA row
+mat.filtered.week <- mat.week2[!row.has.all.na,] # delete NA rows
+covdet.filtered.week<-covdet.week2[!row.has.all.na,] 
+#see preview of mat.week Red=0, blue=1, NA=white
+image(t(mat.filtered.week),col =  rainbow(3),  xlab = "week 28-83",  ylab = "Sites")
+
+
+##################################
+####  Unmarked part, per week #############
+##################################
+
+# PART I (import data and create unmarkedFrame)
+siteCovs.d<-ddply(data_guanta.w, c("Sitio"),summarise, # calculate mean of covariets per site
+                  Area = mean (Area), 
+                  #Habitat = unique (Habitat),
+                  Cobertura1    = mean (Cobertura1), # calculate mean of covariates per site
+                  Cobertura2    = mean (Cobertura2),
+                  Densidad_drenaje = mean (Densidad_drenaje),
+                  Densidad_vial= mean(Densidad_Vial) )
+
+habit<-as.vector(siteCovs.d[,1])
+habitat<- substr(habit, nchar (habit)-1, nchar (habit)) 
+siteCovs.d<-cbind(siteCovs.d,habitat)
+
+
+# Standardize site-covariates
+Area.mean <- mean(siteCovs.d$Area)
+Area.sd <- sd(siteCovs.d$Area)
+Area.z <- (siteCovs.d$Area-Area.mean)/Area.sd
+
+Cobertura1.mean <- mean(siteCovs.d$Cobertura1)
+Cobertura1.sd <- sd(siteCovs.d$Cobertura1)
+Cobertura1.z <- (siteCovs.d$Cobertura1-Cobertura1.mean)/Cobertura1.sd
+
+Cobertura2.mean <- mean(siteCovs.d$Cobertura2)
+Cobertura2.sd <- sd(siteCovs.d$Cobertura2)
+Cobertura2.z <- (siteCovs.d$Cobertura2-Cobertura2.mean)/Cobertura2.sd
+
+Densidad_drenaje.mean <- mean(siteCovs.d$Densidad_drenaje)
+Densidad_drenaje.sd <- sd(siteCovs.d$Densidad_drenaje)
+Densidad_drenaje.z <- (siteCovs.d$Densidad_drenaje-Densidad_drenaje.mean)/Densidad_drenaje.sd
+
+Densidad_vial.mean <- mean(siteCovs.d$Densidad_vial)
+Densidad_vial.sd <- sd(siteCovs.d$Densidad_vial)
+Densidad_vial.z <- (siteCovs.d$Densidad_vial-Densidad_vial.mean)/Densidad_vial.sd
+
+ # obsCovs<-list(day = covdet.filtered[,1:ncol(mat.filtered)]) # chk format and match to mat
+
+umf <- unmarkedFrameOccu(y=as.data.frame(mat.filtered.week), #
+                         siteCovs=data.frame(Area=Area.z, Cobertura1=Cobertura1.z, Cobertura2=Cobertura2.z, habitat=as.factor(habitat),
+                                             Densidad_drenaje=Densidad_drenaje.z, Densidad_vial=Densidad_vial.z))#,#,#,
+#obsCovs=obsCovs)
+#obsCovs=list(wind=windData, date=dateData))
+
+
+# PART II (fit 2 models)
+fm1 <- occu (~1 ~1, data=umf) # simple model Mackenzie et al 2002. covariates of detection and occupancy in that order.
+fm2 <- occu(~1 ~Cobertura1, data=umf)
+fm3 <- occu(~ Cobertura1 ~Cobertura2, data=umf)
+fm4 <- occu(~Cobertura2 ~Densidad_drenaje, data=umf)
+fm5 <- occu(~Cobertura1 ~Densidad_vial, data=umf)
+fm6 <- occu(~1 ~Densidad_drenaje, data=umf)
+fm7 <- occu(~Densidad_drenaje ~1, data=umf)
+fm8 <- occu(~Densidad_drenaje ~Densidad_drenaje, data=umf)
+fm9 <- occu(~habitat ~Densidad_drenaje+Cobertura1, data=umf)
+
+# PART III (model selection, model fit, prediction, mapping)
+fms <- fitList(fm1, fm2, fm3, fm4, fm5, fm6, fm7, fm8, fm9)
+modSel(fms) # model selection
+parboot(fm7) # goodness of fit
+
+# to predict just generate a new data set for "best" covariate
+newdata <- data.frame(seq(min(Densidad_drenaje.z), max(Densidad_drenaje.z), length.out = 50))
+colnames(newdata)<-"Densidad_drenaje"
+predict(fm7, type="det", newdata=newdata) # predict for detection
+#predict(fm7, type="state", newdata=newdata) # predict for ocupancy. in the case fm7 is constant. So no predict
+predictions <- predict(fm7, type="det", newdata=newdata, appendData=TRUE)
+
+plot(Predicted ~ Densidad_drenaje, predictions, type="l", ylim=c(0,1),
+     xlab="Densidad_drenaje  (standardized)",
+     ylab="Expected detection probability")
+lines(lower ~ Densidad_drenaje, predictions, type="l", col=gray(0.5))
+lines(upper ~ Densidad_drenaje, predictions, type="l", col=gray(0.5))
+
+
+##################################
+####  Unmarked part, per day #############
+##################################
+
+# PART I (import data and create unmarkedFrame)
+siteCovs.d<-ddply(data_guanta, c("Sitio"),summarise, # calculate mean of covariets per site
+                  Area = mean (Area), 
+                  #Habitat = mean (Habitat),
+                  Cobertura1    = mean (Cobertura1), # calculate mean of covariates per site
+                  Cobertura2    = mean (Cobertura2),
+                  Densidad_drenaje = mean (Densidad_drenaje),
+                  Densidad_Vial= mean(Densidad_Vial))
+
+habit<-as.vector(siteCovs.d[,1])
+habitat<- substr(habit, nchar (habit)-1, nchar (habit)) 
+siteCovs.d<-cbind(siteCovs.d,habitat)
+
+# Standardize site-covariates
+Area.mean <- mean(siteCovs.d$Area)
+Area.sd <- sd(siteCovs.d$Area)
+Area.z <- (siteCovs.d$Area-Area.mean)/Area.sd
+
+Cobertura1.mean <- mean(siteCovs.d$Cobertura1)
+Cobertura1.sd <- sd(siteCovs.d$Cobertura1)
+Cobertura1.z <- (siteCovs.d$Cobertura1-Cobertura1.mean)/Cobertura1.sd
+
+Cobertura2.mean <- mean(siteCovs.d$Cobertura2)
+Cobertura2.sd <- sd(siteCovs.d$Cobertura2)
+Cobertura2.z <- (siteCovs.d$Cobertura2-Cobertura2.mean)/Cobertura2.sd
+
+Densidad_drenaje.mean <- mean(siteCovs.d$Densidad_drenaje)
+Densidad_drenaje.sd <- sd(siteCovs.d$Densidad_drenaje)
+Densidad_drenaje.z <- (siteCovs.d$Densidad_drenaje-Densidad_drenaje.mean)/Densidad_drenaje.sd
+
+Densidad_vial.mean <- mean(siteCovs.d$Densidad_Vial)
+Densidad_vial.sd <- sd(siteCovs.d$Densidad_Vial)
+Densidad_vial.z <- (siteCovs.d$Densidad_Vial-Densidad_vial.mean)/Densidad_vial.sd
+
+obsCovs.d<-list(day = covdet.filtered[,1:ncol(mat.filtered)]) # chk format and match to mat
+
+umf <- unmarkedFrameOccu(y=as.data.frame(mat.filtered), # try using numPrimary?
+                         siteCovs=data.frame(Area=Area.z, Cobertura1=Cobertura1.z, Cobertura2=Cobertura2.z,
+                                             Densidad_drenaje=Densidad_drenaje.z, Densidad_vial=Densidad_vial.z))#,#,
+#obsCovs=list(day=alfl.data[,c("time.1", "time.2", "time.3")]))
+#obsCovs=list(wind=windData, date=dateData))
+
+
+# PART II (fit 2 models)
+fm1 <- occu (~1 ~1, data=umf) # simple model Mackenzie et al 2002. covariates of detection and occupancy in that order.
+fm2 <- occu(~1 ~Cobertura1, data=umf)
+fm3 <- occu(~ Cobertura1 ~Cobertura2, data=umf, starts=c(0, 0, 0, -3))
+fm4 <- occu(~Cobertura2 ~Densidad_drenaje, data=umf, starts=c(0, 0, 0, -3))
+fm5 <- occu(~Cobertura1 ~DensidadVial, data=umf, starts=c(0, 0, 0, -3))
+# PART III (model selection, model fit, prediction, mapping)
+fms <- fitList(fm1, fm2, fm3, fm4, fm5)
+modSel(fms) # model selection
+parboot(fm4) # goodness of fit
+
+newdata <- data.frame(sp.fac = levels(siteCovs(uftest)$sp.fac))
+predict(fm4, type="state", newdata=newdata)
+predict(fm4, type="det", newdata=newdata)
+predictions <- predict(fm4, type="state", newdata=mapdata)
+levelplot(Predicted ~ x.coord+y.coord, data=predictions)
+
+
+
