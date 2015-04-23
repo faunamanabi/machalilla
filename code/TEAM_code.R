@@ -4,6 +4,7 @@
 # Code developed on 2010/07/02 - 2010/12/01
 require(TeachingDemos)
 require(reshape2)
+require(plyr)
 require(ggplot2)
 #script to process raw TEAM files and get them ready for analysis
 f.readin.fix.data<-function(){
@@ -924,8 +925,10 @@ calculateWPIDiagnostics <- function(site.name){
 ### new
 #########################################
 
-f.matrix.creator3
-function(data,year){
+
+
+
+f.matrix.creator3 <- function(data,year){
   #results object
   res<-list()
   
@@ -935,11 +938,11 @@ function(data,year){
   cams<-unique(data$camera_trap)
   cams<-sort(cams)
   rows<-length(cams)
-  species<-unique(data$bin)
+  species<-unique(data$binomial)
   #start and end dates of sampling periods
   data<-data[data$Sampling.Period==year,]
-  min<-min(data$Start.Date)
-  max<-max(data$End.Date)
+  min<-min(data$camera_trap_start_date)
+  max<-max(data$camera_trap_end_date)
   cols<-max-min+1
   
   #sampling period
@@ -947,11 +950,11 @@ function(data,year){
   mat<-matrix(NA,rows,cols,dimnames=list(cams,as.character(date.header)))
   
   #for all cameras, determine the open and close date and mark in the matrix
-  start.dates<-tapply(as.character(data$Start.Date),data$Sampling.Unit.Name,unique)
+  start.dates<-  tapply(as.character(data$Start.Date),data$camera_trap,unique)
   nms<-names(start.dates)
   start.dates<-ymd(start.dates)
   names(start.dates)<-nms
-  end.dates<-tapply(as.character(data$End.Date),data$Sampling.Unit.Name,unique)
+  end.dates<-tapply(as.character(data$End.Date),data$camera_trap,unique)
   end.dates<-ymd(end.dates)
   names(end.dates)<-nms
   
@@ -972,8 +975,8 @@ function(data,year){
   for(i in 1:length(species)){
     indx<-which(data$bin==species[i])
     #dates and cameras when/where the species was photographed
-    dates<-data$Photo.Date[indx]
-    cameras<-data$Sampling.Unit.Name[indx]
+    dates<-data$photo_date2[indx]
+    cameras<-data$camera_trap[indx]
     dates.cameras<-data.frame(dates,cameras)
     #unique combination of dates and cameras 
     dates.cameras<-unique(dates.cameras)
@@ -1000,3 +1003,18 @@ function(data,year){
   res
   
 }
+
+##############################################
+f.matrix.creator4 <- function(data,year){
+  #results object
+  res<-list()
+  
+  
+  
+  
+  
+}
+
+
+
+  

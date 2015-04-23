@@ -26,7 +26,7 @@ lonpercam<-coordsubset %>%
   group_by(camera_trap) %>%
   summarise(longitude = median(longitude, na.rm=TRUE))
 
-fullcams<-dplyr::full_join(latpercam, lonpercam, by="camera_trap") #pega usando camera_trap
+fullcams<-dplyr::full_join(latpercam, lonpercam, by="camera_trap") #Hya solo 59 porque falta la que tomo fotos continuamente
 fullcams2<-as.data.frame(fullcams)
 coordinates(fullcams2) = c("longitude", "latitude") # convierte a spatial object
 # writePointsShape (fullcams2, "shp/machalilla_cams") # escribe en shapefile
@@ -80,19 +80,128 @@ g4<- g2 + overlay + scale_fill_gradient(low = "blue", high = "red") + facet_wrap
 
 ############################################
 
-#function to create binary matrices for all species at a site and sampling period. Matrix has a 1 if the species was seen in a day a 0 if not seen and NA if not sampled
-#The function requires data from one sampling event and will return a list composed of 0,1 matrices, one matrix for each species.
-
-#THIS FUNCTION WORKS WITH NEW TEAM DATA ONLY - do not use with legacy TEAM data
-# this works one year at a time. Separate data in different years first
-
-
+#
+#############################
 #### date fix
+#############################
+
 # unique(year(machalilla.raw$camera_trap_start_time))
-machalilla.raw$photo_date2<-as.Date(machalilla.raw$photo_date, "%d-%b-%Y")
-machalilla.raw$year<-year(machalilla.raw$photo_date2)
+machalilla.raw$photo_date2<-as.Date(as.character(machalilla.raw$photo_date), "%d-%b-%Y")
+
 machalilla.raw$Sampling.Period<-2014
 machalilla.raw$binomial<-paste(machalilla.raw$genus, machalilla.raw$specise, sep = " ")
+
+#############################
+# translate months
+#############################
+# 
+# meses<-as.data.frame(t(matrix(c("ago","aug","dic","dec","ene","jan","abr","apr"),nrow = 2,ncol = 4)))
+# machalilla.raw$camera_trap_start_time2<-NA
+# machalilla.raw$camera_trap_end_time2<-NA
+# for (i in 1:4){  
+# # get month
+#   chkmes<-substr(as.character(machalilla.raw$photo_date), start=4, stop=6)
+#   chkmes2<-substr(as.character(machalilla.raw$camera_trap_start_time), start=4, stop=6)
+#   chkmes3<-substr(as.character(machalilla.raw$camera_trap_end_time), start=4, stop=6)
+#   # chane month
+#   agoind<-which(chkmes == meses[i,1])
+#   agoind2<-which(chkmes2 == meses[i,1])
+#   agoind3<-which(chkmes3 == meses[i,1])
+#   # machalilla.raw$photo_date[agoind]
+#   machalilla.raw$photo_date2[agoind]<-as.Date(gsub(as.character(meses[i,1]), 
+#                                                      as.character(meses[i,2]), 
+#                                                      machalilla.raw$photo_date[agoind]), "%d-%b-%Y")
+#   
+#   machalilla.raw$camera_trap_start_time2[agoind2]<-as.Date(gsub(as.character(meses[i,1]), 
+#                                                    as.character(meses[i,2]), 
+#                                                    machalilla.raw$camera_trap_start_time[agoind2]), "%d-%b-%Y")
+#   
+#   machalilla.raw$camera_trap_end_time2[agoind3]<-as.Date(gsub(as.character(meses[i,1]), 
+#                                                                as.character(meses[i,2]), 
+#                                                                machalilla.raw$camera_trap_end_time[agoind3]), "%d-%b-%Y")
+# }
+# 
+# # tochk
+# # unique(machalilla.raw$photo_date2)
+
+
+machalilla.raw$camera_trap_start_date<-as.Date(substr(as.character(machalilla.raw$camera_trap_start_time), start=1, stop=11), "%d-%b-%Y")
+machalilla.raw$camera_trap_end_date<-as.Date(substr(as.character(machalilla.raw$camera_trap_end_time), start=1, stop=11), "%d-%b-%Y")
+
+#################################
+# Fix 2011 problem
+# Two cameras have date wrong
+# CT-PNM-1-7  and  CT-PNM-3-10
+# Fix start date manually
+################################
+# identify the problem
+# index_problem_2011<-which(machalilla.raw$camera_trap_start_date == "2011-11-11")
+# problem_2011<-machalilla.raw[index_problem_2011,]
+# unique(problem_2011$camera_trap)
+
+
+
+# fix 1-7 just year
+index_1_07<-which(machalilla.raw$camera_trap == "CT-PNM-1-7")
+cam_1_07<-machalilla.raw[index_1_07, ]
+cam_1_07$camera_trap_start_date<-as.Date("2014-09-23", format="%Y-%m-%d")
+cam_1_07<-cam_1_07[-1,] # borra el primero porblematic 2011
+cam_1_07$photo_type<-"Start" # fix start
+cam_1_07$camera_trap_end_date<-as.Date("2014-11-06", format="%Y-%m-%d")
+
+
+# fix 3-10  # restar 15 dias
+index_3_10<-which(machalilla.raw$camera_trap == "CT-PNM-3-10")
+machalilla.raw<-machalilla.raw[-index_3_10 ,]
+cam_3_10<-machalilla.raw[index_3_10, ]
+cam_3_10$camera_trap_start_date<-as.Date("2015-02-12", format="%Y-%m-%d") 
+cam_3_10$camera_trap_end_date<-as.Date("2015-03-15", format="%Y-%m-%d")
+# borra los primeros 30 problematicos con fecha 2011
+cam_3_10<-cam_3_10[-c(1:30),]
+cam_3_10$photo_date2<-cam_3_10$photo_date2  - 15
+
+
+# fix 3-07 # add difference of 380 days
+index_3_07<-which(machalilla.raw$camera_trap == "CT-PNM-3-07")
+machalilla.raw<-machalilla.raw[- index_3_07 ,]
+cam_3_07<-machalilla.raw[index_3_07, ]
+cam_3_07$camera_trap_start_date<-as.Date("2015-02-11", format="%Y-%m-%d")
+cam_3_07$camera_trap_end_date<-as.Date("2015-03-30", format="%Y-%m-%d")
+cam_3_07$photo_date2<- cam_3_07$photo_date2 + 380
+
+### remove from machalilla.raw
+machalilla.raw<-machalilla.raw[-index_1_07 ,]
+# machalilla.raw<-machalilla.raw[-index_3_10 ,]
+# machalilla.raw<-machalilla.raw[-index_3_07 ,]
+
+#### Add corrected
+machalilla.raw<-rbind(machalilla.raw, cam_1_07)
+machalilla.raw<-rbind(machalilla.raw, cam_3_10)
+machalilla.raw<-rbind(machalilla.raw, cam_3_07)
+
+
+
+########## extract yr and month
+machalilla.raw$year<-year(machalilla.raw$photo_date2)
+machalilla.raw$month<-month(machalilla.raw$photo_date2)
+
+
+
+
+##########################
+## get just animals
+##########################
+data<-subset(machalilla.raw, photo_type=="Animal")
+
+# Delete 2011 provisional
+index<-which(data$camera_trap_start_date == "2011-11-11")
+cuales<-data[index,]
+data<-data[-index,]
+
+
+
+# to do
+yr2014<-f.matrix.creator2(data = machalilla.raw, year = 2014) #### fix names in function
 
 ##########################################
 ##### export camera points
@@ -104,12 +213,4 @@ machalilla.raw$binomial<-paste(machalilla.raw$genus, machalilla.raw$specise, sep
 
 cam_point<-unique(machalilla.raw$camera_array)
 
-  coordinates (machalilla.raw$longitude, machalilla.raw$latitude)
-
-# to do
-yr2011<-f.matrix.creator2(data = machalilla.raw, year = 2014) #### fix names in function
-
-
-
-
-
+coordinates (machalilla.raw$longitude, machalilla.raw$latitude)
