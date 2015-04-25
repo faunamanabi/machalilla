@@ -125,7 +125,7 @@ f.picture.min<-function(data){
 f.picture.max<-function(data){
   max(data)
 }
-#function to fix the start/stop time of a camera if it is incorrectly entered	
+#function to fix the start/stop time of a camera if it is incorrectly entered  
 f.start.stop.date.fixer<-function(data){
   
   cam.start.date<-by(data,data$Sampling.Unit.Name,f.start)
@@ -925,8 +925,8 @@ calculateWPIDiagnostics <- function(site.name){
 ### new
 #########################################
 
-
-
+#### sampling year:
+year<-2014
 
 f.matrix.creator3 <- function(data,year){
   #results object
@@ -950,11 +950,11 @@ f.matrix.creator3 <- function(data,year){
   mat<-matrix(NA,rows,cols,dimnames=list(cams,as.character(date.header)))
   
   #for all cameras, determine the open and close date and mark in the matrix
-  start.dates<-  tapply(as.character(data$Start.Date),data$camera_trap,unique)
+  start.dates<-  tapply(as.character(data$camera_trap_start_date),data$camera_trap,unique)
   nms<-names(start.dates)
   start.dates<-ymd(start.dates)
   names(start.dates)<-nms
-  end.dates<-tapply(as.character(data$End.Date),data$camera_trap,unique)
+  end.dates<-tapply(as.character(data$camera_trap_end_date),data$camera_trap,unique)
   end.dates<-ymd(end.dates)
   names(end.dates)<-nms
   
@@ -1014,7 +1014,3 @@ f.matrix.creator4 <- function(data,year){
   
   
 }
-
-
-
-  

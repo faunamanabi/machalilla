@@ -1,18 +1,6 @@
 
 
-require(reshape)
-require(zoo)
-require(ggplot2)
-require(chron)
-require(ggmap)
-require(grid)
-require(xtable)
-require(Hmisc)
-require(quantmod)
-require(reshape2)
-require(plyr)
-require(scales)
-require(lubridate)
+
 
 # setwd ("C:\\Users\\Diego\\Documents\\CodigoR\\Tanzania_report")
 #wd<-"C:\\Users\\Diego\\Documents\\CodigoR\\Tanzania_report"
@@ -21,11 +9,11 @@ require(lubridate)
 # station.name<-as.character(unique(data$Site.Name))
 
 
-#data$Observation.Date = as.Date(data$Sampling.Period)
-start.date<-min(data$camera_trap_start_date)
-end.date<-max(data$camera_trap_end_date)
-# SiteName<-unique(data$Site.Name)
-# Data.Set.Creator<-unique(data$Data.Set.Creator.Scientist)
+# #data$Observation.Date = as.Date(data$Sampling.Period)
+# start.date<-min(data$camera_trap_start_date)
+# end.date<-max(data$camera_trap_end_date)
+# # SiteName<-unique(data$Site.Name)
+# # Data.Set.Creator<-unique(data$Data.Set.Creator.Scientist)
 # Data.Set.Creator.Institutions<-unique(data$Data.Set.Creator.Institutions)
 # ### select mammals ecluding Homo sapiens
 # Mammals<-subset.data.frame(data,subset=Class == "MAMMALIA" & Species != "sapiens")# select Mammals
@@ -38,9 +26,9 @@ end.date<-max(data$camera_trap_end_date)
 # ListBirds<-as.data.frame(unique(Birds$Species))
 # BirdNumber<-nrow(ListBirds)
 
-dates<-seq.Date(start.date, end.date ,by = "years")
-yr<-as.numeric(substr(dates, 1, 4))
-no.yr<-(max(yr)-min(yr))+1
+# dates<-seq.Date(start.date, end.date ,by = "years")
+# yr<-as.numeric(substr(dates, 1, 4))
+# no.yr<-(max(yr)-min(yr))+1
 # 
 # ####Location
 # meanLat<-mean(Mammals$Latitude) - 0.05
@@ -73,9 +61,30 @@ no.yr<-(max(yr)-min(yr))+1
 
 
 # dataset<-machalilla.raw
-# yr_toplot<-1
+# yr_toplot<-2
 
 f.calendar.yr <- function(dataset,yr_toplot) { ##########start ploting function
+  
+  #load packages
+  require(reshape)
+  require(zoo)
+  require(ggplot2)
+  require(chron)
+  require(ggmap)
+  require(grid)
+  require(xtable)
+  require(Hmisc)
+  # require(quantmod)
+  require(reshape2)
+  require(plyr)
+  require(scales)
+  require(lubridate)
+  
+  start.date<-min(dataset$camera_trap_start_date)
+  end.date<-max(dataset$camera_trap_end_date)
+  dates<-seq.Date(start.date, end.date ,by = "years")
+  yr<-as.numeric(substr(dates, 1, 4))
+  no.yr<-(max(yr)-min(yr))+1
   
   years<- as.numeric(substr(as.Date(dataset$photo_date2),1,4))
   months<- as.numeric(substr(as.Date(dataset$photo_date2),6,7))
@@ -164,7 +173,7 @@ f.calendar.yr <- function(dataset,yr_toplot) { ##########start ploting function
   ###get sub sets
   ### get years of sampling 
   dates<-seq(as.Date(start.date), as.Date(end.date),"1 years")
-  yr<-as.numeric(substr(dates, 1, 4))
+  yr<-unique(data4$year)# yr<-as.numeric(substr(dates, 1, 4))
   no.yr<-(max(yr)-min(yr))+1
   
   yr09<-subset(x=data4,year==yr[yr_toplot]) ##### select year to plot
@@ -178,7 +187,7 @@ f.calendar.yr <- function(dataset,yr_toplot) { ##########start ploting function
   momin<-min(yr09_array1$month)
   momax<-max(yr09_array1$month)
   modif<-momax-momin
-  fillings<-c("gray80","white","gray80","white","gray80","white","gray80","white","gray","white","gray","white")
+  fillings<-c("gray80","white","gray80","white","gray80","white","gray80","white","gray80","white","gray80","white")
   fillings2<-as.vector(fillings[momin:momax])
   
   ### part to get month fillings by odd even month
@@ -191,13 +200,13 @@ f.calendar.yr <- function(dataset,yr_toplot) { ##########start ploting function
   ###### Grafica 
   titlegraph<-paste ("Time-Series Photo Calendar ", yr[yr_toplot], sep="")
   
-  momintext<-as.character(month(ymd(080101) + months(momin-1), label = TRUE, abbr = TRUE))
-  nextmonth1<-as.character(month(ymd(080101) + months(momin+1), label = TRUE, abbr = TRUE))
+  momintext<-as.character(month(ymd(080101) + months(momin), label = TRUE, abbr = TRUE))
+  nextmonth1<-as.character(month(ymd(080101) + months(momin+2), label = TRUE, abbr = TRUE))
   nextmonth2<-as.character(month(ymd(080101) + months(momin+3), label = TRUE, abbr = TRUE))
   
   
   momin2<-momin
-  momin3<-momin+1
+  momin3<-momin+2
   momin4<-momin+3
   momin5<-momin+4
   monthstart1<-sum(days_in_month(c(1:momin2)))+1
@@ -205,34 +214,77 @@ f.calendar.yr <- function(dataset,yr_toplot) { ##########start ploting function
   monthstart3<-sum(days_in_month(c(1:momin4)))+1
   monthstart4<-sum(days_in_month(c(1:momin5)))+1
   
+#   
+#   # rect_left <- c(0,60,120,180, 240, 300)
+#   rectangles <- data.frame(
+#     xmin = rect_left,
+#     xmax = rect_left + as.numeric(days_in_month(momin+1)),
+#     ymin = 0.4,
+#     ymax = 1.6
+#   )
   
   if (modif==2) {rect_left<-c(monthstart1)
-                 labelmonth1 <-momintext}
+                 labelmonth1 <-momintext
+                 
+                 # rect_left <- c(0,60,120,180, 240, 300)
+                 rectangles <- data.frame(
+                   xmin = rect_left,
+                   xmax = rect_left + as.numeric(days_in_month(momin+1)),
+                   ymin = 0.4,
+                   ymax = 1.6
+                 )
+                 # edit here if the 3 arrays are in a single year or two years
+                 cal1<- ggplot() +  
+                   geom_rect(data=rectangles, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), 
+                             fill="gray80", alpha=0.5) + 
+                   annotate("text", x = monthstart1+15, y = 1, label = labelmonth1, colour = "gray75",size = 5) 
+                   # annotate("text", x = monthstart1+75, y = 1, label = labelmonth2, colour = "gray75",size = 5) #+
+                   # annotate("text", x = monthstart1+138, y = 1, label = labelmonth3, colour = "gray75",size = 5) 
+                   }
   if (modif==3) {rect_left<-c(monthstart1,monthstart2)
                  labelmonth1 <-momintext
-                 labelmonth2 <-nextmonth1}
+                 labelmonth2 <-nextmonth1
+                 
+                 # rect_left <- c(0,60,120,180, 240, 300)
+                 rectangles <- data.frame(
+                   xmin = rect_left,
+                   xmax = rect_left + as.numeric(days_in_month(momin+1)),
+                   ymin = 0.4,
+                   ymax = 1.6
+                 )
+                 # edit here if the 3 arrays are in a single year or two years
+                 cal1<- ggplot() +  
+                   geom_rect(data=rectangles, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), 
+                             fill="gray80", alpha=0.5) + 
+                   annotate("text", x = monthstart1+15, y = 1, label = labelmonth1, colour = "gray75",size = 5) +
+                   annotate("text", x = monthstart1+75, y = 1, label = labelmonth2, colour = "gray75",size = 5) #+
+                 # annotate("text", x = monthstart1+138, y = 1, label = labelmonth3, colour = "gray75",size = 5) 
+                  }
   if (modif==4) {rect_left<-c(monthstart1,monthstart2,monthstart3) 
                  labelmonth1 <-momintext
                  labelmonth2 <-nextmonth1
-                 labelmonth3 <-nextmonth2}
+                 labelmonth3 <-nextmonth2
+                 
+                 # rect_left <- c(0,60,120,180, 240, 300)
+                 rectangles <- data.frame(
+                   xmin = rect_left,
+                   xmax = rect_left + as.numeric(days_in_month(momin+1)),
+                   ymin = 0.4,
+                   ymax = 1.6
+                 )
+                 # edit here if the 3 arrays are in a single year or two years
+                 cal1<- ggplot() +  
+                   geom_rect(data=rectangles, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), 
+                             fill="gray80", alpha=0.5) + 
+                   annotate("text", x = monthstart1+15, y = 1, label = labelmonth1, colour = "gray75",size = 5) +
+                   annotate("text", x = monthstart1+75, y = 1, label = labelmonth2, colour = "gray75",size = 5) #+
+                   annotate("text", x = monthstart1+138, y = 1, label = labelmonth3, colour = "gray75",size = 5) 
+                  }
   if (modif==5) {rect_left<-c(monthstart1,monthstart2,monthstart3,monthstart4)}
   
   
+
   
-  # rect_left <- c(0,60,120,180, 240, 300)
-  rectangles <- data.frame(
-    xmin = rect_left,
-    xmax = rect_left + as.numeric(days_in_month(momin+1)),
-    ymin = 0.4,
-    ymax = 1.6
-  )
-  
-  cal1<- ggplot() +  
-    geom_rect(data=rectangles, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), 
-              fill="gray80", alpha=0.5) + 
-    annotate("text", x = monthstart1+15, y = 1, label = labelmonth1, colour = "gray75",size = 5) +
-    annotate("text", x = monthstart1+75, y = 1, label = labelmonth2, colour = "gray75",size = 5) +
-    annotate("text", x = monthstart1+138, y = 1, label = labelmonth3, colour = "gray75",size = 5) 
   
   
   #geom_tile(data=yr09_array1, aes(monthf,one, fill = colfill)) +

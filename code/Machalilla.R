@@ -78,8 +78,20 @@ g3a<- g1 + overlay + scale_fill_gradient(low = "blue", high = "red")
 # sin google
 g4<- g2 + overlay + scale_fill_gradient(low = "blue", high = "red") + facet_wrap(~ genus, ncol = 6)
 
-############################################
 
+
+
+
+
+
+
+
+
+
+
+
+############################################
+machalilla.raw<-read.csv("Data/CT-PNM-2014.csv")
 #
 #############################
 #### date fix
@@ -143,48 +155,67 @@ machalilla.raw$camera_trap_end_date<-as.Date(substr(as.character(machalilla.raw$
 
 # fix 1-7 just year
 index_1_07<-which(machalilla.raw$camera_trap == "CT-PNM-1-7")
-cam_1_07<-machalilla.raw[index_1_07, ]
+cam_1_07<-machalilla.raw[index_1_07, ] # make data frame using the cam
+machalilla.raw<-machalilla.raw[-index_1_07 ,] # remove the cam
 cam_1_07$camera_trap_start_date<-as.Date("2014-09-23", format="%Y-%m-%d")
 cam_1_07<-cam_1_07[-1,] # borra el primero porblematic 2011
-cam_1_07$photo_type<-"Start" # fix start
+cam_1_07$photo_type[1]<-"Start" # fix start
 cam_1_07$camera_trap_end_date<-as.Date("2014-11-06", format="%Y-%m-%d")
 
+# fix 1-10  # add 31 days since data setup pickup en data 12 and beyond
+index_1_10<-which(machalilla.raw$camera_trap == "CT-PNM-1-10")
+cam_1_10<-machalilla.raw[index_1_10, ]
+machalilla.raw<-machalilla.raw[-index_1_10 ,]
 
-# fix 3-10  # restar 15 dias
+cam_1_10$camera_trap_start_date<-as.Date("2014-09-23", format="%Y-%m-%d") 
+cam_1_10$camera_trap_end_date<-as.Date("2014-11-05", format="%Y-%m-%d")
+cam_1_10$photo_date2[c(12:875)]<-cam_1_10$photo_date2[c(12:875)] +31
+# delete problematic data
+cam_1_10<-cam_1_10[-24,]
+cam_1_10<-cam_1_10[-25,]
+
+# fix 3-10  # restar 30 dias
 index_3_10<-which(machalilla.raw$camera_trap == "CT-PNM-3-10")
-machalilla.raw<-machalilla.raw[-index_3_10 ,]
 cam_3_10<-machalilla.raw[index_3_10, ]
-cam_3_10$camera_trap_start_date<-as.Date("2015-02-12", format="%Y-%m-%d") 
+machalilla.raw<-machalilla.raw[-index_3_10 ,]
+
+cam_3_10$camera_trap_start_date<-as.Date("2015-01-27", format="%Y-%m-%d") 
 cam_3_10$camera_trap_end_date<-as.Date("2015-03-15", format="%Y-%m-%d")
 # borra los primeros 30 problematicos con fecha 2011
 cam_3_10<-cam_3_10[-c(1:30),]
-cam_3_10$photo_date2<-cam_3_10$photo_date2  - 15
+cam_3_10$photo_date2<-cam_3_10$photo_date2  - 30
 
 
-# fix 3-07 # add difference of 380 days
+# fix 3-07 # add difference of 365 days
 index_3_07<-which(machalilla.raw$camera_trap == "CT-PNM-3-07")
-machalilla.raw<-machalilla.raw[- index_3_07 ,]
 cam_3_07<-machalilla.raw[index_3_07, ]
-cam_3_07$camera_trap_start_date<-as.Date("2015-02-11", format="%Y-%m-%d")
-cam_3_07$camera_trap_end_date<-as.Date("2015-03-30", format="%Y-%m-%d")
-cam_3_07$photo_date2<- cam_3_07$photo_date2 + 380
+
+machalilla.raw<-machalilla.raw[- index_3_07 ,]
+cam_3_07$camera_trap_start_date<-as.Date("2015-01-27", format="%Y-%m-%d")
+cam_3_07$camera_trap_end_date<-as.Date("2015-03-11", format="%Y-%m-%d")
+cam_3_07$photo_date2<- cam_3_07$photo_date2 + 365
 
 ### remove from machalilla.raw
-machalilla.raw<-machalilla.raw[-index_1_07 ,]
+# machalilla.raw<-machalilla.raw[-index_1_07 ,]
 # machalilla.raw<-machalilla.raw[-index_3_10 ,]
 # machalilla.raw<-machalilla.raw[-index_3_07 ,]
 
 #### Add corrected
-machalilla.raw<-rbind(machalilla.raw, cam_1_07)
-machalilla.raw<-rbind(machalilla.raw, cam_3_10)
-machalilla.raw<-rbind(machalilla.raw, cam_3_07)
+machalilla.raw<-rbind(machalilla.raw, cam_1_07, cam_1_10, cam_3_10, cam_3_07)
+# machalilla.raw<-rbind(machalilla.raw, cam_1_10)
+# machalilla.raw<-rbind(machalilla.raw, cam_3_10)
+# machalilla.raw<-rbind(machalilla.raw, cam_3_07)
 
+#  problematic ?
+which(machalilla.raw$photo_date2 == "2011-11-11")
+# which(machalilla.raw$camera_trap == "CT-PNM-1-10")
 
 
 ########## extract yr and month
 machalilla.raw$year<-year(machalilla.raw$photo_date2)
 machalilla.raw$month<-month(machalilla.raw$photo_date2)
-
+# problem?
+which(machalilla.raw$year == "2011")
 
 
 
@@ -192,6 +223,14 @@ machalilla.raw$month<-month(machalilla.raw$photo_date2)
 ## get just animals
 ##########################
 data<-subset(machalilla.raw, photo_type=="Animal")
+
+
+data_animal<-tbl_df(filter(machalilla.raw, year==2014))
+counts_cam_date <- count(data_animal, camera_trap, photo_date)
+colnames(counts_cam_date)<-c("camera_trap", "dates",  "counts")
+counts_cam_date$dates<-as.Date(counts_cam_date$dates,format = "%d-%b-%Y")
+gg.calendar(counts_cam_date)
+
 
 # Delete 2011 provisional
 index<-which(data$camera_trap_start_date == "2011-11-11")
