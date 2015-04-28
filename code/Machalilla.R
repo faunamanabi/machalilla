@@ -1,7 +1,8 @@
 
 
 source("code/TEAM_code.R")
-machalilla.raw<-read.csv("Data/CT-PNM-2014.csv")
+source("code/calendar.R")
+machalilla.raw<-read.csv("Data/CT-PNM-2014.csv") # ojo falta la camara 3-12
 
 # then you can use ggplot2 to plot that object
 library(ggplot2)
@@ -216,6 +217,29 @@ machalilla.raw$year<-year(machalilla.raw$photo_date2)
 machalilla.raw$month<-month(machalilla.raw$photo_date2)
 # problem?
 which(machalilla.raw$year == "2011")
+
+
+####################################
+# make photo calendar type
+####################################
+
+f.calendar.yr(dataset = machalilla.raw, yr_toplot = 1)
+f.calendar.yr(dataset = machalilla.raw, yr_toplot = 2)
+
+
+####################################
+# make mat per species
+####################################
+
+mat.per.sp<-f.matrix.creator2(data = machalilla.raw,year = 2014)
+sp.names<-names(mat.per.sp) # species names
+
+# counting how many (total) records per species by day
+cont.per.sp<-data.frame(row.names = sp.names)
+for (i in 1:length(mat.per.sp)){
+  cont.per.sp[i,1]<-sum(apply(as.data.frame(mat.per.sp [[i]]),FUN=sum,na.rm=T, MARGIN = 1))
+}
+cont.per.sp
 
 
 

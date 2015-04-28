@@ -2,7 +2,7 @@
 
 #Jorge Ahumada. Tropical Ecology Assessment and Monitoring Network. Conservation International
 # Code developed on 2010/07/02 - 2010/12/01
-require(TeachingDemos)
+# require(TeachingDemos)
 require(reshape2)
 require(plyr)
 require(ggplot2)
@@ -28,14 +28,14 @@ f.matrix.creator2<-function(data,year){
   #get the dimensions of the matrix
   
   #list if sanpling units
-  cams<-unique(data$Sampling.Unit.Name)
+  cams<-unique(data$camera_trap)
   cams<-sort(cams)
   rows<-length(cams)
-  species<-unique(data$bin)
+  species<-unique(data$binomial)
   #start and end dates of sampling periods
   data<-data[data$Sampling.Period==year,]
-  min<-min(data$Start.Date)
-  max<-max(data$End.Date)
+  min<-min(data$camera_trap_start_date)
+  max<-max(data$camera_trap_end_date)
   cols<-max-min+1
   
   #sampling period
@@ -43,22 +43,22 @@ f.matrix.creator2<-function(data,year){
   mat<-matrix(NA,rows,cols,dimnames=list(cams,as.character(date.header)))
   
   #for all cameras, determine the open and close date and mark in the matrix
-  start.dates<-tapply(as.character(data$Start.Date),data$Sampling.Unit.Name,unique)
+  start.dates<-tapply(as.character(data$camera_trap_start_date),data$camera_trap,unique)
   nms<-names(start.dates)
-  start.dates<-ymd(start.dates)
+  # start.dates<-ymd(start.dates)
   names(start.dates)<-nms
-  end.dates<-tapply(as.character(data$End.Date),data$Sampling.Unit.Name,unique)
-  end.dates<-ymd(end.dates)
+  end.dates<-tapply(as.character(data$camera_trap_end_date),data$camera_trap,unique)
+  # end.dates<-ymd(end.dates)
   names(end.dates)<-nms
   
   #outline the sampling periods for each camera j
   for(j in 1:length(start.dates)){
     #for each camera beginning and end of sampling
-    low<-which(date.header==start.dates[j])
-    hi<-which(date.header==end.dates[j])
+    low<-which(date.header==as.Date(start.dates[j], format = "%Y-%m-%d"))
+    hi<-which(date.header==as.Date(end.dates[j], format = "%Y-%m-%d"))
     if(length(low)+length(hi)>0){
       indx<-seq(from=low,to=hi)
-      mat[names(start.dates)[j],indx]<-0
+      mat[names(start.dates)[j],indx]<- 0
     } else next
   }
   mat.template<-mat
@@ -68,8 +68,8 @@ f.matrix.creator2<-function(data,year){
   for(i in 1:length(species)){
     indx<-which(data$bin==species[i])
     #dates and cameras when/where the species was photographed
-    dates<-data$Photo.Date[indx]
-    cameras<-data$Sampling.Unit.Name[indx]
+    dates<-data$photo_date2[indx]
+    cameras<-data$camera_trap[indx]
     dates.cameras<-data.frame(dates,cameras)
     #unique combination of dates and cameras 
     dates.cameras<-unique(dates.cameras)
@@ -128,15 +128,15 @@ f.picture.max<-function(data){
 #function to fix the start/stop time of a camera if it is incorrectly entered  
 f.start.stop.date.fixer<-function(data){
   
-  cam.start.date<-by(data,data$Sampling.Unit.Name,f.start)
+  cam.start.date<-by(data,data$camera_trap,f.start)
   cam.start.date<-lapply(cam.start.date,unique)
-  cam.end.date<-by(data,data$Sampling.Unit.Name,f.end)
+  cam.end.date<-by(data,data$camera_trap,f.end)
   cam.end.date<-lapply(cam.end.date,unique)
   
-  #cam.span<-(by(data,data$Sampling.Unit.Name,f.start.minus.end))
+  #cam.span<-(by(data,data$camera_trap,f.start.minus.end))
   #cam.span<-lapply(cam.span,unique)
   
-  pic.span<-by(data,data$Sampling.Unit.Name,f.picture.dates)
+  pic.span<-by(data,data$camera_trap,f.picture.dates)
   min.pic<-lapply(pic.span,f.picture.min)
   max.pic<-lapply(pic.span,f.picture.max)
   #pic.span<-lapply(pic.span,f.picture.span)
@@ -149,7 +149,7 @@ f.start.stop.date.fixer<-function(data){
  print("There are problems with the following cameras:")
  print(cam.id)}
 #for(i in 1:length(indx)){
-#	index<-which(data$Sampling.Unit.Name==cam.id[i])
+#	index<-which(data$camera_trap==cam.id[i])
 #	data$Start.Date[index]<-min.pic[[indx[i]]]
 #	data$End.Date[index]<-max.pic[[indx[i]]]
 #	
@@ -294,7 +294,7 @@ f.test.sep<-function(cond){
 
 #Order the data by Sampling unit name and photo raw name. This will order images chronologically
 f.order.data<-function(data){
-  indx<-order(data$Sampling.Period,data$Sampling.Unit.Name,data$Photo.Taken.Time)
+  indx<-order(data$Sampling.Period,data$camera_trap,data$Photo.Taken.Time)
   data<-data[indx,]
   data
 }
@@ -302,13 +302,13 @@ f.order.data<-function(data){
 #This function removes records that are NOT images.. e.g. Sampling Date records
 f.separate.events<-function(data,thresh){
   
-  #e.data<-by(data$td.photo,data$Sampling.Unit.Name,f.separate,thresh)
+  #e.data<-by(data$td.photo,data$camera_trap,f.separate,thresh)
   indx<-which(is.na(data$Photo.Taken.Time))
   if(length(indx)>0)
     data<-data[-indx,]
   e.data<-f.separate(data$Photo.Taken.Time,thresh)
   #e.data<-data.frame(grp=unlist(e.data))
-  data.frame(data,grp=paste(data$Sampling.Period,".",data$Sampling.Unit.Name,".",e.data,sep=""))
+  data.frame(data,grp=paste(data$Sampling.Period,".",data$camera_trap,".",e.data,sep=""))
   
 }
 #Simulation to explore the effect of changing the threshold on the number
@@ -355,7 +355,7 @@ f.events<-function(data){
   date<-min(as.character(data$Photo.Date))
   time<-min(as.character(data$Photo.Time))
   sp<-unique(as.character(data$bin))
-  sun<-unique(as.character(data$Sampling.Unit.Name))
+  sun<-unique(as.character(data$camera_trap))
   lat<-unique(data$Latitude)
   lon<-unique(data$Longitude)
   sap<-unique(data$Sampling.Period)
@@ -368,7 +368,7 @@ f.events.dataframe<-function(data){
   require(chron)
   qwe<-by(data,data$grp,f.events)
   qwe<-as.data.frame(do.call("rbind",qwe))
-  names(qwe)<-c("Site.Name","Date","Time","Sampling.Period","Temperature","bin","Sampling.Unit.Name","Latitude","Longitude","Moon.Phase")
+  names(qwe)<-c("Site.Name","Date","Time","Sampling.Period","Temperature","bin","camera_trap","Latitude","Longitude","Moon.Phase")
   qwe$Date<-as.Date(chron(dates=as.character(qwe$Date),format=c(dates="y-m-d")))
   qwe$Time<-as.POSIXct(as.character(qwe$Time),format="%H:%M:%S")
   qwe$Temperature<-as.numeric(as.character(qwe$Temperature))
@@ -970,10 +970,10 @@ f.matrix.creator3 <- function(data,year){
   }
   mat.template<-mat
   #get the species
-  #species<-unique(data$bin)
+  #species<-unique(data$binomial)
   #construct the matrix for each species i
   for(i in 1:length(species)){
-    indx<-which(data$bin==species[i])
+    indx<-which(data$binomial==species[i])
     #dates and cameras when/where the species was photographed
     dates<-data$photo_date2[indx]
     cameras<-data$camera_trap[indx]
