@@ -10,7 +10,6 @@ output:
     highlight: tango
     number_sections: yes
     toc: yes
-    toc_depth: 2
   html_document:
     toc: yes
   word_document:
@@ -40,7 +39,7 @@ box: grey
 
 # Duración del muestreo
 
-Las trampas cámara permanecieron activas desde final de septiembre 204 hasta comienzo de marzo 2015.
+Las trampas cámara permanecieron activas desde final de septiembre 204 hasta comienzos de marzo 2015.
  
 
 ```{r calendar1,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=11,fig.width=8}
@@ -203,6 +202,7 @@ Las especies registradas en el Parque Nacional Machalilla fueron 36
 
 ```{r sps,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,results='asis'}
 library(xtable)
+library(dplyr)
 mat.per.sp<-f.matrix.creator2(data = machalilla.raw,year = 2014)
 sp.names<-names(mat.per.sp) # species names
 
@@ -212,15 +212,17 @@ for (i in 1:length(mat.per.sp)){
   cont.per.sp[i,1]<-sum(apply(as.data.frame(mat.per.sp [[i]]),FUN=sum,na.rm=T, MARGIN = 1))
 }
 
-colnames(cont.per.sp)<-"Numero de fotos"
-xtable(cont.per.sp)
+cont.per.sp$especie<-rownames(cont.per.sp)
+colnames(cont.per.sp)<-c("Numero_de_fotos","especie")
+xtable(arrange(df = cont.per.sp, desc(Numero_de_fotos)))
 ```
 
 # Covariables 
 
-Inicialmente se probo con tres covariables para ajustar los modelos de ocupacion. Estas tres covariables fueron: Altitud (elev), Pendiente (slope) y Distancia a la carrterera pavimentada (dis_rd)
+Inicialmente se probó con cinco covariables para ajustar los modelos de ocupación. Estas cinco covariables fueron: Altitud (elev), Pendiente (slope) y Distancia a la carretera pavimentada (dis_rd) como covariables geográficas y altura del dosel, cobertura del dosel y área basal como covariables que se midieron momento de retirar las cámaras. Estas medidas se tomaron usando la metodología del cuadrante centrado en un punto. 
 
-La Altitud se obtuvo de ina imagen SRTM del repositorio de [CGIAR](http://srtm.csi.cgiar.org/). La pendiente se ririvo de la altitud y la distancia a las carreteras se obtuvo de un mapa del Ministerio del Medio Ambiente del Ecuador.
+La Altitud se obtuvo de una imagen SRTM del repositorio de [CGIAR](http://srtm.csi.cgiar.org/). La pendiente se infirió a partir de la altitud y la distancia a las carreteras se obtuvo de un mapa del Ministerio del Medio Ambiente del Ecuador.
+
 
 
 ```{r covs,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE}
@@ -240,8 +242,14 @@ lati<-unique(machalilla.raw$latitude)
 centercoord<-c(mean(subset(long, long<=1)),mean(unique(subset(lati, lati<=1))))
 coordsubset<-subset(machalilla.raw,select = c(camera_trap,longitude,latitude,first_name_set_camera))
 
+#################################
 # get elevation
-elevation<-getData('SRTM',lon=centercoord[1], lat=centercoord[2])
+################################
+
+# elevation<-getData('SRTM',lon=centercoord[1], lat=centercoord[2])
+
+ # read elevation from disk
+elevation<- raster("C://Users//Diego//Documents//CodigoR//ULEAM//Infor_Caract//code//srtm_20_13.tif")
 
 cam.cords<-as.data.frame(distinct(coordsubset))
 coordinates(cam.cords) <- ~longitude+latitude #make sppatial data fram
@@ -287,6 +295,13 @@ cam.and.covs<-as.data.frame(cam.cords)
 plot(roadpol, col=topo.colors(65))
 plot(cam.cords, add=T, col="red")
 title(main="Distancia a las carreteras", sub="en color rojo se muestra donde se instalaron las camaras")
+
+##################################
+## Estructura Veget
+##################################
+
+est.veget<-read.csv("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/Data/estructVeget.csv") # read table
+cam.and.covs<-cbind(cam.and.covs,est.veget) #Paste covs
 
 
 ```
@@ -350,6 +365,10 @@ f.sp.occu.models <- function(sp_number){
     fm4 <- occu(~ elev ~ elev, sp_UMF)
     fm5 <- occu(~ elev ~ slope, sp_UMF)
     fm6 <- occu(~ elev ~ dist_rd, sp_UMF)
+    fm7 <- occu(~ basal_a ~ 1, sp_UMF)
+    fm8 <- occu(~ basal_a ~ elev, sp_UMF)
+    fm9 <- occu(~ basal_a ~ canopy_c, sp_UMF)
+    fm10 <- occu(~ 1 ~ canopy_c, sp_UMF)
     
     # put the names of each model
     models <- fitList(
@@ -359,14 +378,20 @@ f.sp.occu.models <- function(sp_number){
       'p(.)psi(dist_rd)' = fm3,
       'p(elev)psi(elev)' = fm4,
       'p(elev)psi(slope)' = fm5,
-      'p(elev)psi(dist_rd)' = fm6)
+      'p(elev)psi(dist_rd)' = fm6,
+      'p(basal_a)psi(.)' = fm7,
+      'p(basal_a)psi(elev)' = fm8,
+      'p(basal_a)psi(canopy_c)' = fm9,
+      'p(.)psi(canopy_c)' = fm10
+      )
     
     ms <- modSel(models)
     # (ms)
     
     #This part store some models coeficients in a table (mat_models) to compare on screen
   ms_AIC_models<-as.data.frame(ms@ Full[1], row.names = NULL) #store model name
-  modelo<-paste("model for: ", as.character(as.character(sp.names[sp_number])),sep="") # fix model name addin species
+  modelo<-paste("_", as.character(as.character(sp.names[sp_number])), 
+                "_", " models", sep="") # fix model name addin species
   ma_nPars<-as.data.frame(ms@Full$nPars) #store parameter number
   ms_AIC_values<- as.data.frame(ms@Full$AIC) #store AIC values
   ms_AIC_delta<- as.data.frame(ms@Full$delta) #store AIC delta values
@@ -389,29 +414,43 @@ f.sp.occu.models <- function(sp_number){
 
 ```
 
-
 #Modelos de ocupacion por especie
-## La cabra (_Eira barbara_)
+## La Cabra (_Capra aegagrus_)
 ### Matriz de datos colapsada a 15 dias
 
-```{r mat_sp6,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=6,fig.width=7}
+```{r mat_sp3,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=4,fig.width=7}
+ f.sp.occu.plot.mat(sp_number = 3)
+```
+
+### Seleccion de Modelos
+```{r modeo_sps3,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,results='asis'}
+print(as.character(sp.names[sp_number=3]))
+f.sp.occu.models(sp_number = 3)
+```
+
+## El Cabeza de Mate (_Eira barbara_)
+### Matriz de datos colapsada a 15 dias
+
+```{r mat_sp6,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=4,fig.width=7}
 f.sp.occu.plot.mat(sp_number = 6)
 ```
 
 ### Seleccion de Modelos
 ```{r modeo_sps6,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,results='asis'}
+print(as.character(sp.names[sp_number=6]))
 f.sp.occu.models(sp_number = 6)
 ```
 
 ## El tigrillo (_Leopardus wiedii_)
 ### Matriz de datos colapsada a 15 dias
 
-```{r mat_sp9,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=6,fig.width=7}
+```{r mat_sp9,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=4,fig.width=7}
 f.sp.occu.plot.mat(sp_number = 9)
 ```
 
 ### Seleccion de Modelos
 ```{r modeo_sps9,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,results='asis'}
+print(as.character(sp.names[sp_number=9]))
 f.sp.occu.models(sp_number = 9)
 ```
 
@@ -419,7 +458,7 @@ f.sp.occu.models(sp_number = 9)
 ## La vaca (_Bos primigenius_)
 ### Matriz de datos colapsada a 15 dias
 
-```{r mat_sp10,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=6,fig.width=7}
+```{r mat_sp10,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=4,fig.width=7}
 f.sp.occu.plot.mat(sp_number = 10)
 ```
 
@@ -432,8 +471,8 @@ f.sp.occu.models(sp_number = 10)
 ## El Perro domestico (_Canis lupus_)
 ### Matriz de datos colapsada a 15 dias
 
-```{r mat_sp2,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=6,fig.width=7}
-f.sp.occu.plot.mat(sp_number = 2)
+```{r mat_sp2,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=4,fig.width=7}
+ f.sp.occu.plot.mat(sp_number = 2)
 ```
 
 ### Seleccion de Modelos
@@ -445,8 +484,8 @@ f.sp.occu.models(sp_number = 2)
 ## El Oso Hormiero (_Tamandua mexicana_)
 ### Matriz de datos colapsada a 15 dias
 
-```{r mat_sp5,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=6,fig.width=7}
-f.sp.occu.plot.mat(sp_number = 5)
+```{r mat_sp5,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=4,fig.width=7}
+ f.sp.occu.plot.mat(sp_number = 5)
 ```
 
 ### Seleccion de Modelos
@@ -458,7 +497,7 @@ f.sp.occu.models(sp_number = 5)
 ## El Venado (_Odocoileus virginianus_)
 ### Matriz de datos colapsada a 15 dias
 
-```{r mat_sp8,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=6,fig.width=7}
+```{r mat_sp8,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=4,fig.width=7}
 f.sp.occu.plot.mat(sp_number = 8)
 ```
 
@@ -471,8 +510,8 @@ f.sp.occu.models(sp_number = 8)
 ## El Conejo (_Sylvilagus brasiliensis_)
 ### Matriz de datos colapsada a 15 dias
 
-```{r mat_sp11,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=6,fig.width=7}
-f.sp.occu.plot.mat(sp_number = 11)
+```{r mat_sp11,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=4,fig.width=7}
+ f.sp.occu.plot.mat(sp_number = 11)
 ```
 
 ### Seleccion de Modelos
@@ -486,8 +525,8 @@ f.sp.occu.models(sp_number = 11)
 ## El Caballo (_Equus ferus_)
 ### Matriz de datos colapsada a 15 dias
 
-```{r mat_sp12,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=6,fig.width=7}
-f.sp.occu.plot.mat(sp_number = 12)
+```{r mat_sp12,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=4,fig.width=7}
+ f.sp.occu.plot.mat(sp_number = 12)
 ```
 
 ### Seleccion de Modelos
@@ -500,8 +539,8 @@ f.sp.occu.models(sp_number = 12)
 ## La Guanta (_Cuniculus paca_)
 ### Matriz de datos colapsada a 15 dias
 
-```{r mat_sp13,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=6,fig.width=7}
-f.sp.occu.plot.mat(sp_number = 13)
+```{r mat_sp13,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=4,fig.width=7}
+ f.sp.occu.plot.mat(sp_number = 13)
 ```
 
 ### Seleccion de Modelos
@@ -514,8 +553,8 @@ f.sp.occu.models(sp_number = 13)
 ## La Guatusa (_Dasyprocta punctata_)
 ### Matriz de datos colapsada a 15 dias
 
-```{r mat_sp19,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=6,fig.width=7}
-f.sp.occu.plot.mat(sp_number = 19)
+```{r mat_sp19,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=4,fig.width=7}
+ f.sp.occu.plot.mat(sp_number = 19)
 ```
 
 ### Seleccion de Modelos
@@ -527,8 +566,8 @@ f.sp.occu.models(sp_number = 19)
 ## El Pecari (_Pecari tajacu_)
 ### Matriz de datos colapsada a 15 dias
 
-```{r mat_sp20,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=6,fig.width=7}
-f.sp.occu.plot.mat(sp_number = 20)
+```{r mat_sp20,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=4,fig.width=7}
+ f.sp.occu.plot.mat(sp_number = 20)
 ```
 
 ### Seleccion de Modelos
@@ -540,8 +579,8 @@ f.sp.occu.models(sp_number = 20)
 ## El Armadillo (_Dasypus novemcinctus_)
 ### Matriz de datos colapsada a 15 dias
 
-```{r mat_sp22,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=6,fig.width=7}
-f.sp.occu.plot.mat(sp_number = 22)
+```{r mat_sp22,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=4,fig.width=7}
+ f.sp.occu.plot.mat(sp_number = 22)
 ```
 
 ### Seleccion de Modelos
@@ -552,11 +591,11 @@ f.sp.occu.models(sp_number = 22)
 
 
 
-## La Ardilla (_Sciurus stramineus_)
+## La Ardilla de Guayaquil (_Sciurus stramineus_)
 ### Matriz de datos colapsada a 15 dias
 
-```{r mat_sp23,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=6,fig.width=7}
-f.sp.occu.plot.mat(sp_number = 23)
+```{r mat_sp23,cache=TRUE,warning=FALSE,eval=TRUE, echo=FALSE,fig.height=4,fig.width=7}
+ f.sp.occu.plot.mat(sp_number = 23)
 ```
 
 ### Seleccion de Modelos

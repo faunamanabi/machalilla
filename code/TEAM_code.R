@@ -1005,12 +1005,3 @@ f.matrix.creator3 <- function(data,year){
 }
 
 ##############################################
-f.matrix.creator4 <- function(data,year){
-  #results object
-  res<-list()
-  
-  
-  
-  
-  
-}

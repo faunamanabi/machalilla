@@ -10,6 +10,7 @@ library(maptools)
 library(rgdal) 
 library(dismo)
 library(sdm)
+library(spatstat)
 
 machalilla.raw<-read.csv("Data/CT-PNM-2014.csv") # ojo falta la camara 3-12
 
@@ -45,6 +46,35 @@ slope.ovr <- extract(slope, cam.cords, method='bilinear')
 cam.cords$elev<-elev.ovr
 cam.cords$slope<-slope.ovr
 
+############################
+# road
+############################
 
+
+
+roads <- readShapeSpatial("shp\\machalilla_roads.shp")
+proj4string(roads)<-geo #put georef
+xrange=c(-80.9, -80.5)
+yrange=c(-1.75,-1.35)
+window<-owin(xrange, yrange)
+roads.ow<-as(roads, "SpatialLines",ext = window) # make SpatialLines
+
+
+roads.psp<-as.psp(roads.ow)
+
+road.density<-density.psp(roads.psp,edge = T)
+road.density.im<-as.im(road.density)
+
+roadpol <- readShapeSpatial("shp\\machalilla_roadsclip.shp")
+names(roadpol)<-"dist_rd"
+proj4string(roadpol)<-geo
+dist_rd<-over(x = cam.cords, y = roadpol)
+# add to table
+cam.cords$dist_rd<-as.numeric(dist_rd[,1])
+
+# roadpol.ow<-as(as(roadpol, "SpatialPolygons"), "owin") # make owin
+cam.and.covs<-as.data.frame(cam.cords)
+
+# falta deforestacion, tipo de habitat (bosque humedo seco)
 
 
