@@ -234,12 +234,82 @@ f.calendar.yr(dataset = machalilla.raw, yr_toplot = 2)
 mat.per.sp<-f.matrix.creator2(data = machalilla.raw,year = 2014)
 sp.names<-names(mat.per.sp) # species names
 
-# counting how many (total) records per species by day
+# counting how many (total) records per species by all days
 cont.per.sp<-data.frame(row.names = sp.names)
 for (i in 1:length(mat.per.sp)){
   cont.per.sp[i,1]<-sum(apply(as.data.frame(mat.per.sp [[i]]),FUN=sum,na.rm=T, MARGIN = 1))
 }
 cont.per.sp
+
+########################
+### see mat as image
+########################
+
+image(t(mat.per.sp[[2]]),col =  topo.colors(5)) # change number to see anoter species
+title(main = as.character(sp.names[2]), font.main = 4)
+
+
+########################
+### shrink to 15
+########################
+
+library(unmarked)
+
+E_barbara_15<-f.shrink.matrix.to15(matrix = mat.per.sp[[6]])
+
+
+########################
+### make unmarked object 
+########################
+
+E_barbara_UMF <- unmarkedFrameOccu(E_barbara_15)
+plot(E_barbara_UMF, panels=1)
+# add some  covariates
+siteCovs(E_barbara_UMF) <- cam.and.covs
+
+#######################
+## occu models 
+#######################
+
+#  covariates of detection and occupancy in that order.
+fm0 <- occu(~ 1 ~ 1, E_barbara_UMF) 
+fm1 <- occu(~ 1 ~ elev, E_barbara_UMF)
+fm2 <- occu(~ 1 ~ slope, E_barbara_UMF)
+fm3 <- occu(~ 1 ~ dist_rd, E_barbara_UMF)
+fm4 <- occu(~ elev ~ elev, E_barbara_UMF)
+fm5 <- occu(~ elev ~ slope, E_barbara_UMF)
+fm6 <- occu(~ elev ~ dist_rd, E_barbara_UMF)
+
+# put the names of each model
+models <- fitList(
+  'p(.)psi(.)' = fm0,
+  'p(.)psi(elev)' = fm1,
+  'p(.)psi(slope)' = fm2,
+  'p(.)psi(dist_rd)' = fm3,
+  'p(elev)psi(elev)' = fm4,
+  'p(elev)psi(slope)' = fm5,
+  'p(elev)psi(dist_rd)' = fm6)
+
+ms <- modSel(models)
+ms
+
+
+confint(fm0, type='det', method = 'normal')
+confint(fm0, type='det', method = 'profile')
+
+# estimate detection effect at obsvars=0.5
+(lc <- linearComb(fm0['det'],c(1,0.5)))
+
+# transform this to probability (0 to 1) scale and get confidence limits
+(btlc <- backTransform(lc))
+confint(btlc, level = 0.9)
+
+# Empirical Bayes estimates of proportion of sites occupied
+re <- ranef(fm0)
+sum(bup(re, stat="mode"))
+
+
+
 
 
 
