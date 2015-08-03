@@ -213,8 +213,8 @@ for (i in 1:length(mat.per.sp)){
 }
 
 cont.per.sp$especie<-rownames(cont.per.sp)
-colnames(cont.per.sp)<-c("Numero_de_fotos","especie")
-xtable(arrange(df = cont.per.sp, desc(Numero_de_fotos)))
+colnames(cont.per.sp)<-c("Numero_de_registros","especie")
+xtable(arrange(df = cont.per.sp, desc(Numero_de_registros)))
 ```
 
 # Covariables 
