@@ -5,7 +5,7 @@ library(lubridate)
 library(maptools)
 # Load 'rgdal' package, which is used to read/write shapefiles and rasters
 library(rgdal)
-source("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/code/TEAM_code.R")
+source("code/TEAM_code.R")
 # source("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/code/calendar.R")
 load(file = "data/machalilla_fixed.RData")
 
@@ -112,7 +112,7 @@ kable(Table1, format = "markdown")
 # Riqueza de especies y acumulación, modelando la ocurrencia y la detectabilidad. 
 # Este análisis sigue el método de Dorazio et al. (2006).
 
-source("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/code/MultiSpeciesSiteOcc.R")
+source("code/MultiSpeciesSiteOcc.R")
 
 X1 = as.matrix(row.per.sp) # col.per.sp por dias y row.per.sp por sitios (camaras)
 nrepls = 90 #dias 
