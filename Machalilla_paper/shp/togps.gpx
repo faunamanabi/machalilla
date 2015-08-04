@@ -1,0 +1,170 @@
+<?xml version="1.0"?>
+<gpx
+ version="1.0"
+ creator="DNRGarmin - http://www.dnr.state.mn.us/mis/gis/tools/arcview/extensions/DNRGarmin/DNRGarmin.html"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="http://www.topografix.com/GPX/1/0"
+ xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd">
+ <author>DIEGO</author>
+ <time>2015-01-26T00:16:58Z</time>
+ <wpt lat="-1.556" lon="-80.7205278">
+   <name>CT-PNM-1-1</name>
+   <cmt>23:50 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.6001389" lon="-80.6922222">
+   <name>CT-PNM-1-2</name>
+   <cmt>23:50 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.5295833" lon="-80.7270833">
+   <name>CT-PNM-1-11</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.5922778" lon="-80.702">
+   <name>CT-PNM-1-9</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.5829444" lon="-80.7102778">
+   <name>CT-PNM-1-7</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.6102778" lon="-80.7006667">
+   <name>CT-PNM-1-4</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.5832778" lon="-80.6933889">
+   <name>CT-PNM-1-6</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.6110278" lon="-80.6834444">
+   <name>CT-PNM-1-5</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.5555556" lon="-80.7368056">
+   <name>CT-PNM-1-14</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.5919167" lon="-80.6838611">
+   <name>CT-PNM-1-8</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.67361" lon="-80.69244">
+   <name>CT-PNM-2-12</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.5200833" lon="-80.7554444">
+   <name>CT-PNM-1-17</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.5291667" lon="-80.7645">
+   <name>CT-PNM-1-16</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.5106111" lon="-80.7645556">
+   <name>CT-PNM-1-18</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.67338" lon="-80.71058">
+   <name>CT-PNM-2-19</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.64666" lon="-80.647472">
+   <name>CT-PNM-2-17</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.5745" lon="-80.71925">
+   <name>CT-PNM-1-12</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.5485556" lon="-80.7465833">
+   <name>CT-PNM-1-19</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.5200278" lon="-80.7734722">
+   <name>CT-PNM-1-15</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.6195278" lon="-80.6936389">
+   <name>CT-PNM-1-3</name>
+   <cmt>23:50 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.61941" lon="-80.65658">
+   <name>CT-PNM-2-20</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.66475" lon="-80.68347">
+   <name>CT-PNM-2-10</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.6555" lon="-80.65663">
+   <name>CT-PNM-2-4</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.65558" lon="-80.67458">
+   <name>CT-PNM-2-5</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.67361" lon="-80.6745">
+   <name>CT-PNM-2-6</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.66461" lon="-80.66558">
+   <name>CT-PNM-2-7</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.64638" lon="-80.68355">
+   <name>CT-PNM-2-8</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.61025" lon="-80.64755">
+   <name>CT-PNM-2-9</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.68377" lon="-80.71916">
+   <name>CT-PNM-2-2</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.5641667" lon="-80.7279167">
+   <name>CT-PNM-1-20</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.628305" lon="-80.647527">
+   <name>CT-PNM-2-16</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.6295" lon="-80.66588">
+   <name>CT-PNM-2-15</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.66463" lon="-80.70158">
+   <name>CT-PNM-2-13</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.66533" lon="-80.64777">
+   <name>CT-PNM-2-14</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.63741" lon="-80.65672">
+   <name>CT-PNM-2-1</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.6013" lon="-80.65658">
+   <name>CT-PNM-2-11</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.5476111" lon="-80.7283056">
+   <name>CT-PNM-1-13</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.62847" lon="-80.6835">
+   <name>CT-PNM-2-18</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.63744" lon="-80.69275">
+   <name>CT-PNM-2-3</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+ <wpt lat="-1.575" lon="-80.68375">
+   <name>CT-PNM-1-10</name>
+   <cmt>23:51 25-Jan-15</cmt>
+ </wpt>
+</gpx>

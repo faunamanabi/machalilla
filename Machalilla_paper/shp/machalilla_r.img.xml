@@ -1,0 +1,3 @@
+<?xml version="1.0"?>
+<!--<!DOCTYPE metadata SYSTEM "http://www.esri.com/metadata/esriprof80.dtd">-->
+<metadata xml:lang="en"><Esri><MetaID>{CB0A0486-4BCC-4265-A663-88D381B6AC25}</MetaID><CreaDate>20150503</CreaDate><CreaTime>02272700</CreaTime><SyncOnce>TRUE</SyncOnce><DataProperties><lineage><Process ToolSource="C:\Program Files (x86)\ArcGIS\ArcToolbox\Toolboxes\Conversion Tools.tbx\PolygonToRaster" Date="20150503" Time="022727">PolygonToRaster machalilla_roads_Ringsclip distance C:\Mapas\Pacoche\Mapas\machalilla_r.img CELL_CENTER NONE 0.0016</Process></lineage></DataProperties></Esri></metadata>
