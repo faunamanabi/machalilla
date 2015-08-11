@@ -53,7 +53,7 @@ library(rgdal)
 source("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/code/TEAM_code.R")
 source("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/code/calendar.R")
 
-machalilla.raw<-read.csv("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/Data/CT-PNM-2014.csv") # ojo falta la camara 3-12 asume diden worked?
+machalilla.raw<-read.csv("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/Data/CT-PNM-2014.csv") # ojo falta la camara 3-12 asume didnt work?
 
 #############################
 #### date fix
@@ -102,12 +102,13 @@ machalilla.raw$binomial<-paste(machalilla.raw$genus, machalilla.raw$specise, sep
 machalilla.raw$camera_trap_start_date<-as.Date(substr(as.character(machalilla.raw$camera_trap_start_time), start=1, stop=11), "%d-%b-%Y")
 machalilla.raw$camera_trap_end_date<-as.Date(substr(as.character(machalilla.raw$camera_trap_end_time), start=1, stop=11), "%d-%b-%Y")
 
-#################################
+#############################################
 # Fix 2011 problem
 # Two cameras have date wrong
-# CT-PNM-1-7  and  CT-PNM-3-10
+# CT-PNM-1-7  and  CT-PNM-3-10 
 # Fix start date manually
-################################
+# add manually start end for CT-PNM-3-12
+#############################################
 # identify the problem
 # index_problem_2011<-which(machalilla.raw$camera_trap_start_date == "2011-11-11")
 # problem_2011<-machalilla.raw[index_problem_2011,]
@@ -147,6 +148,12 @@ cam_3_10$camera_trap_end_date<-as.Date("2015-03-15", format="%Y-%m-%d")
 cam_3_10<-cam_3_10[-c(1:30),]
 cam_3_10$photo_date2<-cam_3_10$photo_date2  - 30
 
+########### adding 3_12 cam
+cam_3_12<-rbind(cam_3_10[1,], cam_3_10[5,], cam_3_10[470,], cam_3_10[474,])
+cam_3_12$camera_trap<-"CT-PNM-3-12"
+cam_3_12$latitude <- -1.528639
+cam_3_12$longitude <- -80.782417
+
 
 # fix 3-07 # add difference of 365 days
 index_3_07<-which(machalilla.raw$camera_trap == "CT-PNM-3-07")
@@ -163,7 +170,7 @@ cam_3_07$photo_date2<- cam_3_07$photo_date2 + 365
 # machalilla.raw<-machalilla.raw[-index_3_07 ,]
 
 #### Add corrected
-machalilla.raw<-rbind(machalilla.raw, cam_1_07, cam_1_10, cam_3_10, cam_3_07)
+machalilla.raw<-rbind(machalilla.raw, cam_1_07, cam_1_10, cam_3_10, cam_3_07, cam_3_12)
 # machalilla.raw<-rbind(machalilla.raw, cam_1_10)
 # machalilla.raw<-rbind(machalilla.raw, cam_3_10)
 # machalilla.raw<-rbind(machalilla.raw, cam_3_07)

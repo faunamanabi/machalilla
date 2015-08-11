@@ -29,7 +29,7 @@ sp.names<-names(mat.per.sp) # species names
 
 # counting how many (total) records per species by all days
 cont.per.sp<-data.frame(row.names = sp.names)
-row.per.sp<-as.data.frame(matrix(nrow = length(sp.names), ncol=c(59)))
+row.per.sp<-as.data.frame(matrix(nrow = length(sp.names), ncol=c(60)))
 col.per.sp<-as.data.frame(matrix(nrow = length(sp.names), ncol=c(161)))
 rownames(row.per.sp)<-sp.names
 rownames(col.per.sp)<-sp.names
@@ -63,6 +63,7 @@ row.per.sp<-row.per.sp[-36,] # elimina Cathartes aura
 row.per.sp<-row.per.sp[-35,] # elimina Gallus gallus
 row.per.sp<-row.per.sp[-34,] # elimina Zenaida auriculata
 row.per.sp<-row.per.sp[-33,] # elimina Momotus momota
+
 row.per.sp<-row.per.sp[-30,] # elimina Heliomaster longirostris 
 row.per.sp<-row.per.sp[-29,] # elimina Pipistrellus pipistrellus 
 row.per.sp<-row.per.sp[-26,] # elimina Ortalis vetula 
@@ -100,11 +101,12 @@ length(row.per.sp[,1])
 library(knitr)
 presence<-row.per.sp
 presence[presence > 0]<-1 # replace to 1
-naiveoccu<-apply(X = presence,FUN = sum, MARGIN = 1 ) / 59 #divided number of sites
+naiveoccu<-apply(X = presence,FUN = sum, MARGIN = 1 ) / 55 #divided number of sites
 events<-apply(X = row.per.sp ,FUN = sum, MARGIN = 1 )
-RAI<-(events/(114 * 59)) * 100 #114 is total sampling effort in days
+RAI<-(events/(37.8 * 55)) * 100 #37.8 is average sampling effort, in days per camera
 Table1<-cbind(events, RAI, naiveoccu)
-kable(Table1, format = "markdown")
+kable(Table1, format = "rst")
+
 ############################################################
 ## Distribucion posterior de la riqueza de especies
 ############################################################
@@ -115,7 +117,7 @@ kable(Table1, format = "markdown")
 source("code/MultiSpeciesSiteOcc.R")
 
 X1 = as.matrix(row.per.sp) # col.per.sp por dias y row.per.sp por sitios (camaras)
-nrepls = 90 #dias 
+nrepls = 130 #dias 
 especies = MultiSpeciesSiteOcc(nrepls, X1)
 
 # summary(especies$fit$sims.matrix)
@@ -168,6 +170,60 @@ J <- H/log(S)
 
 rarecurve(t(row.per.sp),step = 20, sample = raremax)
 
+###############################################
+##### Mammal tree for pyloenetic diversity
+##### 
+##### tree from: 
+##### Fritz, S. A., Bininda-Emonds, O. R. P. & Purvis, A. 
+##### 2009 Geographical variation in predictors of mammalian 
+##### extinction risk: big is bad, but only in the tropics. 
+##### Ecol. Lett. 12, 538–49. (doi:10.1111/j.1461-0248.2009.01307.x)
+###############################################
+
+library(picante)
+
+fullcomm<-(as.matrix(t(row.per.sp)))
+spname_rayita<-sub( " ", "_", colnames(fullcomm))
+#### fix Puma yagouaroundi and Myotis 
+spname_rayita[8]<-"Puma_concolor"
+spname_rayita[17]<-"Artibeus_jamaicensis"
+
+colnames(fullcomm)<-spname_rayita
+
+mammal.tree<-read.nexus("data/MammalTree_nexus2.txt")
+prunedphy <- prune.sample(fullcomm, mammal.tree[[1]])
+
+# prunedphy
+plot(prunedphy)
+
+# community by forest type
+cam.habitat<-read.csv("data/cam_habitat.csv", header = T)
+
+# filter mat.per.sp to sp of wild mammals
+mammal.per.sp<- mat.per.sp[-c(37,36,35,34,33,30,29,26,25,21,16,15,14,12,10,7,4,3,2,1)]
+full.mammal<-ldply(mammal.per.sp, data.frame)
 
 
 
+# convert list of species to unmarked 
+# fullmat<-f.convert.to.unmarked(mammal.per.sp)
+spcies<-as.data.frame( full.mammal[,1])
+colnames(spcies)<-"sp"
+obs<-as.data.frame(full.mammal[,2:162])
+
+#  covariates of detection and occupancy in that order.
+fullmat<-unmarkedFrameOccu(y=obs,siteCovs=spcies)
+
+fm0 <- occu(~ 1 ~ 1, fullmat) 
+fm1 <- occu(~ 1 ~ sp, fullmat)
+fm2 <- occu(~ sp ~ 1, fullmat)
+fm3 <- occu(~ sp ~ sp, fullmat)
+
+
+models <- fitList(
+  'p(.)psi(.)' = fm0,
+  'p(.)psi(sp)' = fm1,
+  'p(sp)psi(.)' = fm2,
+  'p(sp)psi(sp)' = fm3)
+
+ms <- modSel(models)
