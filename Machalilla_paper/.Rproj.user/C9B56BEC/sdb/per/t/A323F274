@@ -1,0 +1,25 @@
+{
+    "contents" : "",
+    "created" : 1438182093910.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "A323F274",
+    "lastKnownWriteTime" : 7011605692497750387,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "cadn3vokwb",
+        "caption" : "machalilla.raw",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=machalilla.raw&cache_key=cadn3vokwb",
+        "displayedObservations" : 30839,
+        "environment" : "",
+        "object" : "machalilla.raw",
+        "totalObservations" : 30839,
+        "variables" : 36
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "type" : "r_dataframe"
+}

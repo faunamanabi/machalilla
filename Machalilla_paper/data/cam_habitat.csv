@@ -1,61 +1,61 @@
-camera_trap,habitat_type
-CT-PNM-1-1,dry
-CT-PNM-1-2,humid
-CT-PNM-1-3,transition
-CT-PNM-1-4,humid
-CT-PNM-1-5,transition
-CT-PNM-1-6,humid
-CT-PNM-1-7,transition
-CT-PNM-1-8,humid
-CT-PNM-1-9,humid
-CT-PNM-1-10,humid
-CT-PNM-1-11,dry
-CT-PNM-1-12,humid
-CT-PNM-1-13,dry
-CT-PNM-1-14,dry
-CT-PNM-1-15,dry
-CT-PNM-1-16,dry
-CT-PNM-1-17,dry
-CT-PNM-1-18,dry
-CT-PNM-1-19,dry
-CT-PNM-1-20,humid
-CT-PNM-2-1,dry
-CT-PNM-2-2,humid
-CT-PNM-2-3,transition
-CT-PNM-2-4,dry
-CT-PNM-2-5,transition
-CT-PNM-2-6,dry
-CT-PNM-2-7,dry
-CT-PNM-2-8,dry
-CT-PNM-2-9,dry
-CT-PNM-2-10,dry
-CT-PNM-2-11,dry
-CT-PNM-2-12,dry
-CT-PNM-2-13,humid
-CT-PNM-2-14,dry
-CT-PNM-2-15,humid
-CT-PNM-2-16,dry
-CT-PNM-2-17,dry
-CT-PNM-2-18,dry
-CT-PNM-2-19,dry
-CT-PNM-2-20,dry
-CT-PNM-3-1,dry
-CT-PNM-3-2,dry
-CT-PNM-3-3,dry
-CT-PNM-3-4,dry
-CT-PNM-3-5,transition
-CT-PNM-3-6,dry
-CT-PNM-3-7,transition
-CT-PNM-3-8,dry
-CT-PNM-3-9,dry
-CT-PNM-3-10,dry
-CT-PNM-3-11,dry
-CT-PNM-3-12,dry
-CT-PNM-3-13,transition
-CT-PNM-3-14,dry
-CT-PNM-3-15,transition
-CT-PNM-3-16,dry
-CT-PNM-3-17,dry
-CT-PNM-3-18,transition
-CT-PNM-3-19,transition
-CT-PNM-3-20,humid
+camera_trap,habitat_type,,,,,
+CT-PNM-1-1,dry,,," [1] ""CT-PNM-1-1"" ",,dry
+CT-PNM-1-2,humid,,," [2] ""CT-PNM-1-10""",,humid
+CT-PNM-1-3,transition,,," [3] ""CT-PNM-1-11""",,dry
+CT-PNM-1-4,humid,,," [4] ""CT-PNM-1-12""",,humid
+CT-PNM-1-5,transition,,," [5] ""CT-PNM-1-13""",,dry
+CT-PNM-1-6,humid,,," [6] ""CT-PNM-1-14""",,dry
+CT-PNM-1-7,transition,,," [7] ""CT-PNM-1-15""",,dry
+CT-PNM-1-8,humid,,," [8] ""CT-PNM-1-16""",,dry
+CT-PNM-1-9,humid,,," [9] ""CT-PNM-1-17""",,dry
+CT-PNM-1-10,humid,,,"[10] ""CT-PNM-1-18""",,dry
+CT-PNM-1-11,dry,,,"[11] ""CT-PNM-1-19""",,dry
+CT-PNM-1-12,humid,,,"[12] ""CT-PNM-1-2"" ",,humid
+CT-PNM-1-13,dry,,,"[13] ""CT-PNM-1-20""",,humid
+CT-PNM-1-14,dry,,,"[14] ""CT-PNM-1-3"" ",,transition
+CT-PNM-1-15,dry,,,"[15] ""CT-PNM-1-4"" ",,humid
+CT-PNM-1-16,dry,,,"[16] ""CT-PNM-1-5"" ",,transition
+CT-PNM-1-17,dry,,,"[17] ""CT-PNM-1-6"" ",,humid
+CT-PNM-1-18,dry,,,"[18] ""CT-PNM-1-7"" ",,transition
+CT-PNM-1-19,dry,,,"[19] ""CT-PNM-1-8"" ",,humid
+CT-PNM-1-20,humid,,,"[20] ""CT-PNM-1-9"" ",,humid
+CT-PNM-2-1,dry,,,"[21] ""CT-PNM-2-1"" ",,dry
+CT-PNM-2-2,humid,,,"[22] ""CT-PNM-2-10""",,dry
+CT-PNM-2-3,transition,,,"[23] ""CT-PNM-2-11""",,dry
+CT-PNM-2-4,dry,,,"[24] ""CT-PNM-2-12""",,dry
+CT-PNM-2-5,transition,,,"[25] ""CT-PNM-2-13""",,humid
+CT-PNM-2-6,dry,,,"[26] ""CT-PNM-2-14""",,dry
+CT-PNM-2-7,dry,,,"[27] ""CT-PNM-2-15""",,humid
+CT-PNM-2-8,dry,,,"[28] ""CT-PNM-2-16""",,dry
+CT-PNM-2-9,dry,,,"[29] ""CT-PNM-2-17""",,dry
+CT-PNM-2-10,dry,,,"[30] ""CT-PNM-2-18""",,dry
+CT-PNM-2-11,dry,,,"[31] ""CT-PNM-2-19""",,dry
+CT-PNM-2-12,dry,,,"[32] ""CT-PNM-2-2"" ",,humid
+CT-PNM-2-13,humid,,,"[33] ""CT-PNM-2-20""",,dry
+CT-PNM-2-14,dry,,,"[34] ""CT-PNM-2-3"" ",,transition
+CT-PNM-2-15,humid,,,"[35] ""CT-PNM-2-4"" ",,dry
+CT-PNM-2-16,dry,,,"[36] ""CT-PNM-2-5"" ",,transition
+CT-PNM-2-17,dry,,,"[37] ""CT-PNM-2-6"" ",,dry
+CT-PNM-2-18,dry,,,"[38] ""CT-PNM-2-7"" ",,dry
+CT-PNM-2-19,dry,,,"[39] ""CT-PNM-2-8"" ",,dry
+CT-PNM-2-20,dry,,,"[40] ""CT-PNM-2-9"" ",,dry
+CT-PNM-3-1,dry,,,"[41] ""CT-PNM-3-01""",,dry
+CT-PNM-3-2,dry,,,"[42] ""CT-PNM-3-02""",,dry
+CT-PNM-3-3,dry,,,"[43] ""CT-PNM-3-03""",,dry
+CT-PNM-3-4,dry,,,"[44] ""CT-PNM-3-04""",,dry
+CT-PNM-3-5,transition,,,"[45] ""CT-PNM-3-05""",,transition
+CT-PNM-3-6,dry,,,"[46] ""CT-PNM-3-06""",,dry
+CT-PNM-3-7,transition,,,"[47] ""CT-PNM-3-07""",,transition
+CT-PNM-3-8,dry,,,"[48] ""CT-PNM-3-08""",,dry
+CT-PNM-3-9,dry,,,"[49] ""CT-PNM-3-09""",,dry
+CT-PNM-3-10,dry,,,"[50] ""CT-PNM-3-10""",,dry
+CT-PNM-3-11,dry,,,"[51] ""CT-PNM-3-11""",,dry
+CT-PNM-3-12,dry,,,"[52] ""CT-PNM-3-13""",,transition
+CT-PNM-3-13,transition,,,"[53] ""CT-PNM-3-14""",,dry
+CT-PNM-3-14,dry,,,"[54] ""CT-PNM-3-15""",,transition
+CT-PNM-3-15,transition,,,"[55] ""CT-PNM-3-16""",,dry
+CT-PNM-3-16,dry,,,"[56] ""CT-PNM-3-17""",,dry
+CT-PNM-3-17,dry,,,"[57] ""CT-PNM-3-18""",,transition
+CT-PNM-3-18,transition,,,"[58] ""CT-PNM-3-19""",,transition
+CT-PNM-3-19,transition,,,"[59] ""CT-PNM-3-20""",,humid
+CT-PNM-3-20,humid,,,"[60] ""CT-PNM-3-12""",,dry

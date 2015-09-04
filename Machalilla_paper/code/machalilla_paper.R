@@ -5,7 +5,7 @@ library(lubridate)
 library(maptools)
 # Load 'rgdal' package, which is used to read/write shapefiles and rasters
 library(rgdal)
-source("code/TEAM_code.R")
+source("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/code/TEAM_code.R")
 # source("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/code/calendar.R")
 load(file = "data/machalilla_fixed.RData")
 
@@ -114,7 +114,7 @@ kable(Table1, format = "rst")
 # Riqueza de especies y acumulación, modelando la ocurrencia y la detectabilidad. 
 # Este análisis sigue el método de Dorazio et al. (2006).
 
-source("code/MultiSpeciesSiteOcc.R")
+source("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/code/MultiSpeciesSiteOcc.R")
 
 X1 = as.matrix(row.per.sp) # col.per.sp por dias y row.per.sp por sitios (camaras)
 nrepls = 130 #dias 
@@ -153,9 +153,12 @@ summary(sp1)
 plot(sp1, ci.type="poly", col="blue", lwd=2, ci.lty=0, ci.col="lightblue")
 boxplot(sp1, col="yellow", add=TRUE, pch="+")
 
-plot(sp2, ci.type="poly", col="blue", lwd=2, ci.lty=0, ci.col="lightblue")
-plot(sp2)
+plot(sp2, ci.type="poly", col="blue", lwd=2, ci.lty=0, ci.col="lightblue") # rarefaction
+#plot(sp2)
 # boxplot(sp1, col="yellow", add=TRUE, pch="+")
+
+plot(sp3, ci.type="poly", col="blue", lwd=2, ci.lty=0, ci.col="lightblue")
+#plot(sp2)
 
 H <- diversity(t(row.per.sp))
 simp <- diversity(t(row.per.sp), "simpson")
@@ -168,7 +171,180 @@ pairs(cbind(H, simp, invsimp, r.2, alpha), pch="+", col="blue")
 S <- specnumber(t(row.per.sp)) ## rowSums(BCI > 0) does the same...
 J <- H/log(S)
 
-rarecurve(t(row.per.sp),step = 20, sample = raremax)
+rarecurve(row.per.sp)#,step = 20, sample = raremax)
+## Rarefaction
+(raremax <- max(rowSums(row.per.sp)))
+Srare <- rarefy(t(row.per.sp), raremax)
+plot(S, Srare, xlab = "Observed No. of Species", ylab = "Rarefied No. of Species")
+abline(0, 1)
+rarecurve(row.per.sp)#, step = 2, sample = raremax, col = "blue", cex = 0.6)
+
+
+
+# filter mat.per.sp to sp of wild mammals
+mammal.per.sp<- mat.per.sp[-c(37,36,35,34,33,30,29,26,25,21,16,15,14,12,10,7,4,3,2,1)]
+full.mammal<-ldply(mammal.per.sp, data.frame)
+
+sp.abund.count<-col.per.sp[-c(37,36,35,34,33,30,29,26,25,21,16,15,14,12,10,7,4,3,2,1),]
+
+# 
+# # convert list of species to unmarked 
+# # fullmat2<-f.convert.to.unmarked(mammal.per.sp[2])
+# spcies<-as.data.frame( full.mammal[,1])
+# colnames(spcies)<-"sp"
+# obs<-as.data.frame(full.mammal[,2:162])
+# 
+# #  covariates of detection and occupancy in that order.
+# fullmat<-unmarkedFrameOccu(y=obs,siteCovs=spcies)
+# 
+# fm0 <- occu(~ 1 ~ 1, fullmat) 
+# fm1 <- occu(~ 1 ~ sp, fullmat)
+# fm2 <- occu(~ sp ~ 1, fullmat)
+# fm3 <- occu(~ sp ~ sp, fullmat)
+# 
+# 
+# models <- fitList(
+#   'p(.)psi(.)' = fm0,
+#   'p(.)psi(sp)' = fm1,
+#   'p(sp)psi(.)' = fm2,
+#   'p(sp)psi(sp)' = fm3)
+# 
+# ms <- modSel(models)
+# ############### someting weird in number of parameters compared to Rovero
+
+obs2<-row.per.sp #sp.abund.count
+spcies2<-as.data.frame(rownames(row.per.sp)) #sp.abund.count
+colnames(spcies2)<-"sp"
+
+
+spcies2$guild<-c("Insectivore", "Carnivore", "Hervibivore",
+                 "Carnivore",  "Hervibivore", "Hervibivore",
+                 "Carnivore", "Carnivore", "Hervibivore",
+                 "Onmivore", "Insectivore", "Hervibivore",
+                 "Carnivore", "Hervibivore", "Carnivore",
+                 "Onmivore", "Insectivore")
+spcies2$mass<-c(4209, 3910, 55508, 3249, 949, 8000, 11900,
+                6750, 2674, 21266, 4203, 433, 6950, 22800,
+                4030, 1091, 42)
+habitat<-c("dry","humid","dry","humid","dry",
+           "dry","dry","dry","dry","dry",
+           "dry", "humid", "humid", "transition", "humid",
+           "transition", "humid",  "transition", "humid",
+           "humid", "dry", "dry", "dry", "dry", "humid",
+           "dry", "humid", "dry", "dry", "dry", "dry", "humid",
+           "dry", "transition", "dry", "transition", "dry", "dry",
+           "dry", "dry", "dry", "dry", "dry", "dry", "transition",
+           "dry", "transition", "dry", "dry",  "dry", "dry", "transition",
+           "dry", "transition",  "dry", "dry", "transition", "transition",
+           "humid", "dry")
+
+habitat2<-matrix(rep(habitat, 17), nrow = 17, ncol = 60, byrow = TRUE)
+
+fullmat2<-unmarkedFrameOccu(y=obs2,siteCovs=spcies2)
+
+#covariates of detection and occupancy in that order.
+fm0 <- occu(~ 1 ~ 1, fullmat2) 
+fm1 <- occu(~ 1 ~ guild, fullmat2)
+fm2 <- occu(~ guild ~ 1, fullmat2)
+fm3 <- occu(~ guild ~ guild, fullmat2)
+fm4 <- occu(~ mass~ 1, fullmat2)
+fm5 <- occu(~ mass ~ guild, fullmat2)
+fm6 <- occu(~ mass + guild ~ 1, fullmat2)
+fm7 <- occu(~ sp ~ guild, fullmat2)
+
+models1 <- fitList(
+  'p(.)psi(.)' = fm0,
+  'p(.)psi(guild)' = fm1,
+  'p(guild)psi(.)' = fm2,
+  'p(guild)psi(guild)' = fm3,
+  'p(mass)psi(.)' = fm4,
+  'p(mass)psi(guild)' = fm5,
+  'p(mass, guild)psi(.)' = fm6,
+  'p(sp)psi(guild)' = fm7)
+
+ms1 <- modSel(models1)
+
+
+##############################
+
+obs3<-t(row.per.sp) #sp.abund.count
+species3<-(rownames(row.per.sp)) #sp.abund.count
+# (spcies2)<-"sp"
+species.obs<-matrix(rep(species3,60), # the data elements 
+     nrow=60,              # number of rows 
+     ncol=17,              # number of columns 
+     byrow = TRUE)        # fill matrix by rows
+
+
+guild<-c("Insectivore", "Carnivore", "Hervibivore",
+                 "Carnivore",  "Hervibivore", "Hervibivore",
+                 "Carnivore", "Carnivore", "Hervibivore",
+                 "Onmivore", "Insectivore", "Hervibivore",
+                 "Carnivore", "Hervibivore", "Carnivore",
+                 "Onmivore", "Hervibivore")
+guild.obs<-matrix(rep(guild,60), # the data elements 
+                    nrow=60,              # number of rows 
+                    ncol=17,              # number of columns 
+                    byrow = TRUE)
+
+mass<-c(4209, 3910, 55508, 3249, 949, 8000, 11900,
+                6750, 2674, 21266, 4203, 433, 6950, 22800,
+                4030, 1091, 42)
+mass.obs<-matrix(rep(mass,60), # the data elements 
+                  nrow=60,              # number of rows 
+                  ncol=17,              # number of columns 
+                  byrow = TRUE)
+
+habitat3<-c("dry","humid","dry","humid","dry",
+           "dry","dry","dry","dry","dry",
+           "dry", "humid", "humid", "transition", "humid",
+           "transition", "humid",  "transition", "humid",
+           "humid", "dry", "dry", "dry", "dry", "humid",
+           "dry", "humid", "dry", "dry", "dry", "dry", "humid",
+           "dry", "transition", "dry", "transition", "dry", "dry",
+           "dry", "dry", "dry", "dry", "dry", "dry", "transition",
+           "dry", "transition", "dry", "dry",  "dry", "dry", "transition",
+           "dry", "transition",  "dry", "dry", "transition", "transition",
+           "humid", "dry")
+
+
+obs.covs <- list(
+  sp=species.obs,
+  guild= guild.obs,
+  mass= mass.obs)
+
+
+fullmat3<-unmarkedFrameOccu(y=obs3, 
+                            siteCovs=as.data.frame(habitat3), 
+                            obsCovs=obs.covs)
+
+#covariates of detection and occupancy in that order.
+fm0 <- occu(~ 1 ~ 1, fullmat3) 
+fm1 <- occu(~ guild ~ 1, fullmat3)
+fm2 <- occu(~ mass ~ 1, fullmat3)
+fm3 <- occu(~ guild + mass ~ 1, fullmat3)
+fm4 <- occu(~ 1~ habitat3, fullmat3)
+fm5 <- occu(~ guild ~ habitat3, fullmat3)
+fm6 <- occu(~ mass ~ habitat3, fullmat3)
+fm7 <- occu(~ guild + mass ~ habitat3, fullmat3)
+fm8 <- occu(~ habitat3 ~ habitat3, fullmat3)
+fm9 <- occu(~ sp ~ habitat3, fullmat3)
+
+
+models2 <- fitList(
+  'p(.)psi(.)' = fm0,
+  'p(guild)psi(.)' = fm1,
+  'p(mass)psi(.)' = fm2,
+  'p(guild, mass)psi(.)' = fm3,
+  'p(.)psi(habitat)' = fm4,
+  'p(guild)psi(habitat)' = fm5,
+  'p(mass)psi(habitat)' = fm6,
+  'p(guild, mass)psi(habitat)' = fm7,
+  'p(habitat)psi(habitat)' = fm8,
+  'p(sp)psi(habitat)' = fm9)  
+
+ms2 <- modSel(models2)
+
 
 ###############################################
 ##### Mammal tree for pyloenetic diversity
@@ -196,34 +372,185 @@ prunedphy <- prune.sample(fullcomm, mammal.tree[[1]])
 # prunedphy
 plot(prunedphy)
 
+#############################
 # community by forest type
-cam.habitat<-read.csv("data/cam_habitat.csv", header = T)
+# cam.habitat<-read.csv("data/cam_habitat.csv", header = T)
+abun.sp<-as.data.frame(obs3)
+abun.sp$habitat<-habitat3
 
-# filter mat.per.sp to sp of wild mammals
-mammal.per.sp<- mat.per.sp[-c(37,36,35,34,33,30,29,26,25,21,16,15,14,12,10,7,4,3,2,1)]
-full.mammal<-ldply(mammal.per.sp, data.frame)
+humid.cam<-dplyr::filter(abun.sp, habitat3=="humid")
+humid.com<-apply(humid.cam[,1:17],2,sum)
+
+transition.cam<-dplyr::filter(abun.sp, habitat3=="transition")
+transition.com<-apply(transition.cam[,1:17],2,sum)
+
+dry.cam<-dplyr::filter(abun.sp, habitat3=="dry")
+dry.com<-apply(dry.cam[,1:17],2,sum)
+
+communi<-matrix(
+          c(humid.com, transition.com, dry.com),
+          nrow=3,              # number of rows 
+          ncol=17,              # number of columns 
+          byrow = TRUE)
+
+colnames(communi)<-spname_rayita
+rownames(communi)<-c("humid", "transition", "dry")
 
 
 
-# convert list of species to unmarked 
-# fullmat<-f.convert.to.unmarked(mammal.per.sp)
-spcies<-as.data.frame( full.mammal[,1])
-colnames(spcies)<-"sp"
-obs<-as.data.frame(full.mammal[,2:162])
+#############################
+# traits mass guild
 
-#  covariates of detection and occupancy in that order.
-fullmat<-unmarkedFrameOccu(y=obs,siteCovs=spcies)
-
-fm0 <- occu(~ 1 ~ 1, fullmat) 
-fm1 <- occu(~ 1 ~ sp, fullmat)
-fm2 <- occu(~ sp ~ 1, fullmat)
-fm3 <- occu(~ sp ~ sp, fullmat)
+sp.traits<-cbind(guild, mass)
+rownames(sp.traits)<-spname_rayita
 
 
-models <- fitList(
-  'p(.)psi(.)' = fm0,
-  'p(.)psi(sp)' = fm1,
-  'p(sp)psi(.)' = fm2,
-  'p(sp)psi(sp)' = fm3)
+# see species present in each community
+par(mfrow = c(1, 3))
+  for (i in row.names(communi)) {
+  plot(prunedphy, show.tip.label = FALSE, main = i)
+  tiplabels(tip = which(prunedphy$tip.label %in% names(which(communi [i, ] > 0))) , pch=19, cex=2)
+  }
 
-ms <- modSel(models)
+
+pd.result <- pd(communi, mammal.tree[[1]], include.root=TRUE)
+pd.result
+
+phydist <- cophenetic(mammal.tree[[1]]) #Cophenetic Distances for mammal Clustering
+ses.mpd.result <- ses.mpd(communi, phydist, null.model="taxa.labels", abundance.weighted=TRUE, runs = 1000) #pairwise distances in communities
+ses.mpd.result
+
+ses.mntd.result <- ses.mntd(communi, phydist, null.model="taxa.labels", abundance.weighted=TRUE, runs = 1000) #pairwise distances in communities
+ses.mntd.result
+                          
+
+############################################
+### Geographic covariates
+############################################
+
+library(raster)
+library(rgdal)
+# library(dismo)
+# library(biomod2)
+library(spatstat)
+library(sp)
+library(dplyr)
+library(maptools)
+
+
+long<-unique(machalilla.fixed$longitude)
+lati<-unique(machalilla.fixed$latitude)
+centercoord<-c(mean(subset(long, long<=1)),mean(unique(subset(lati, lati<=1))))
+coordsubset<-subset(machalilla.fixed,select = c(camera_trap,longitude,latitude,first_name_set_camera))
+
+#################################
+# get elevation
+################################
+
+# elevation<-getData('SRTM',lon=centercoord[1], lat=centercoord[2])
+
+# read elevation from disk
+elevation<- raster("C://Users//Diego//Documents//CodigoR//ULEAM//Infor_Caract//code//srtm_20_13.tif")
+
+elevation2 <- readGDAL("C://Users//Diego//Documents//CodigoR//ULEAM//Infor_Caract//code//srtm_20_13.tif")
+image(elevation, col= grey(1:99/100), axes=TRUE)
+elevation<-raster(elevation2)
+
+
+cam.cords<-as.data.frame(distinct(coordsubset))
+coordinates(cam.cords) <- ~longitude+latitude #make sppatial data fram
+geo <- CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") #def cord
+proj4string(cam.cords)<-geo # set cords
+
+e<-extent (-80.9, -80.5, -1.75,-1.35)
+elevation.crop<-crop(elevation, e)
+
+e = extent(raster(xmn = -80.9, xmx = -80.5, ymn = -1.75, ymx = -1.35))
+cr1 = crop(elevation, e)
+
+
+
+# plot(elevation.crop)
+# plot(cam.cords, add=T, col="red")
+# title(main="Altitud", sub="en color rojo se muestra donde se instalaron las camaras")
+
+slope<-terrain(elevation.crop, opt='slope', unit='degrees', neighbors=4)
+# plot(slope)
+# plot(cam.cords, add=T, col="red")
+# title(main="Pendiente", sub="en color rojo se muestra donde se instalaron las camaras")
+
+cam.cords.sp<-SpatialPoints(cam.cords)
+proj4string(cam.cords.sp)<-geo 
+# etract values
+elev.ovr <- extract(elevation.crop, cam.cords, method='bilinear')
+slope.ovr <- extract(slope, cam.cords, method='bilinear')
+
+# add to table
+cam.cords$elev<-elev.ovr
+cam.cords$slope<-slope.ovr
+
+############################
+# road
+############################
+
+roadpol <- readShapeSpatial("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/shp/machalilla_roadsclip.shp")
+names(roadpol)<-"dist_rd"
+proj4string(roadpol)<-geo
+dist_rd<-over(x = cam.cords, y = roadpol)
+# add to table
+cam.cords$dist_rd<-as.numeric(dist_rd[,1])
+
+roadpol.ow<-as(as(roadpol, "SpatialPolygons"), "owin") # make owin
+cam.and.covs<-as.data.frame(cam.cords)
+
+# plot(roadpol, col=topo.colors(65))
+# plot(cam.cords, add=T, col="red")
+# title(main="Distancia a las carreteras", sub="en color rojo se muestra donde se instalaron las camaras")
+
+
+#####################################################
+## Deforestation
+####################################################
+
+dist.def<-raster("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/Data/dist_def.tif")
+
+# plot(dist.def)
+# plot(cam.cords, add=T, col="red")
+# title(main="Distancia a Deforestacion", sub="en color rojo se muestra donde se instalaron las camaras")
+
+# plot(deforestado, col="red", add=T)
+# etract values
+dist.def.ovr <- extract(dist.def, cam.cords, method='bilinear')
+index<-which(is.na(dist.def.ovr)) # detect NA. Means cam is in deforested
+dist.def.ovr [index]<-0 # camera in distance cero to deforested
+
+
+# add to table
+cam.and.covs$dist_def<-as.numeric(dist.def.ovr)
+
+cam.cords$dist_def<-dist.def.ovr
+# am.and.covs<-as.data.frame(cam.cords)
+
+
+##################################
+## Estructura Veget
+##################################
+
+est.veget<-read.csv("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/Data/estructVeget.csv") # read table
+
+cam.and.covs<-cbind(cam.and.covs, est.veget) #Paste covs
+
+
+################################
+cam.and.covs.scaled <-cbind(scale(cam.and.covs[5],center = T,scale = T),
+                            scale(cam.and.covs[6],center = T,scale = T),
+                            scale(cam.and.covs[7],center = T,scale = T),
+                            scale(cam.and.covs[8],center = T,scale = T),
+                            scale(cam.and.covs[10],center = T,scale = T),
+                            scale(cam.and.covs[11],center = T,scale = T),
+                            scale(cam.and.covs[12],center = T,scale = T))
+
+
+
+
+
