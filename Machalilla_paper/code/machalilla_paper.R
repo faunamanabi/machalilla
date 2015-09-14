@@ -5,7 +5,7 @@ library(lubridate)
 library(maptools)
 # Load 'rgdal' package, which is used to read/write shapefiles and rasters
 library(rgdal)
-source("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/code/TEAM_code.R")
+source("C:/Users/CaracterizaciónD/Documents/GitHub/pacoche/code/TEAM_code.R")
 # source("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/code/calendar.R")
 load(file = "data/machalilla_fixed.RData")
 
@@ -114,7 +114,7 @@ kable(Table1, format = "rst")
 # Riqueza de especies y acumulación, modelando la ocurrencia y la detectabilidad. 
 # Este análisis sigue el método de Dorazio et al. (2006).
 
-source("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/code/MultiSpeciesSiteOcc.R")
+source("C:/Users/CaracterizaciónD/Documents/GitHub/pacoche/code/MultiSpeciesSiteOcc.R")
 
 X1 = as.matrix(row.per.sp) # col.per.sp por dias y row.per.sp por sitios (camaras)
 nrepls = 130 #dias 
@@ -240,6 +240,7 @@ habitat<-c("dry","humid","dry","humid","dry",
 
 habitat2<-matrix(rep(habitat, 17), nrow = 17, ncol = 60, byrow = TRUE)
 
+library(unmarked)
 fullmat2<-unmarkedFrameOccu(y=obs2,siteCovs=spcies2)
 
 #covariates of detection and occupancy in that order.
@@ -329,6 +330,7 @@ fm6 <- occu(~ mass ~ habitat3, fullmat3)
 fm7 <- occu(~ guild + mass ~ habitat3, fullmat3)
 fm8 <- occu(~ habitat3 ~ habitat3, fullmat3)
 fm9 <- occu(~ sp ~ habitat3, fullmat3)
+
 
 
 models2 <- fitList(
