@@ -56,7 +56,7 @@ source("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/code/calendar.R")
 machalilla.raw<-read.csv("C:/Users/Diego/Documents/CodigoR/ULEAM/Infor_Caract/Data/CT-PNM-2014.csv") # ojo falta la camara 3-12
 
 #############################
-#### date fix
+#### date fix  
 #############################
 
 # unique(year(machalilla.raw$camera_trap_start_time))
